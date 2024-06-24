@@ -4,4 +4,5 @@ export const TYPES = {
     BcryptService: Symbol.for('BcryptService'),
     JwtService: Symbol.for('JwtService'),
     AuthService: Symbol.for('AuthService'),
+    OllamaService: Symbol.for('OllamaService'),
 }
