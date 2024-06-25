@@ -16,3 +16,22 @@ model User {
   password String
   role     String
 }
+
+model Theme {
+  id        Int      @id @default(autoincrement())
+  name      String
+  themeQuestions data[] @relation("ThemeQuestion")
+  themeReponses  data[] @relation("ThemeReponse")
+}
+
+model data {
+  id            Int      @id @default(autoincrement())
+  question      String
+  reponse       String?
+  exploitable   Boolean @default(false)
+  themeQuestionId Int?
+  themeReponseId  Int?
+  themeQuestion   Theme?    @relation("ThemeQuestion", fields: [themeQuestionId], references: [id])
+  themeReponse    Theme?    @relation("ThemeReponse", fields: [themeReponseId], references: [id])
+  note          Int @default(0)
+}

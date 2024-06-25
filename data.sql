@@ -1,8 +1,3 @@
-CREATE TABLE data(
-  id INTEGER PRIMARY KEY,
-  question VARCHAR(10000),
-  reponse  VARCHAR(10000)
-);
 INSERT INTO data(question,reponse) VALUES ('bonjour, que se passe-t-il?','L operation de l oeil droit n a pas eu lieu car mon taux de Sucre etait trop eleve   il faut repoussser en September');
 INSERT INTO data(question,reponse) VALUES ('Vous n''avez pas répondu : ce questionnaire va être clôturé. Encas de problèmes de santé en lien avec votre intervention, vous pouvez joindre le 01.00.00.00.00. Veuillez continuer les traitements. Bonne journée à vous.','TVB Merci infiniment  Marija Kekic');
 INSERT INTO data(question,reponse) VALUES ('Merci de votre réponse. Si besoin vous pouvez nous appeler au 01.00.00.00.00 du lundi au vendredi entre 09:00 et 17:00 et au 01.00.00.00.00 le samedi','Merci beaucoup je vous souhaite une très bonne journée');
