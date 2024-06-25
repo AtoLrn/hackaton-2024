@@ -8,9 +8,12 @@ export const loader = async () => {
   const ollamaService = container.get<Iollama>(TYPES.OllamaService)
 
   try {
-    const results = await ollamaService.fetchFeedbacks()
+    // const results = await ollamaService.fetchHealthIndicatorFromFeedback()
+    const results = await ollamaService.fetchHealthIndicatorFromFeedback()
+    const resultsbis = await ollamaService.fetchSatisfactionIndicatorFromFeedback()
     return json({
-      results
+      results,
+      resultsbis
     })
   } catch (e) {
     if (e instanceof ErrorLoadingTooEarly) {
