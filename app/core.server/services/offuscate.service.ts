@@ -1,7 +1,7 @@
 import { injectable, multiInject } from "inversify"
 import { Patient } from "../entities/patient.entity"
 import { TYPES } from "../infrastructure"
-import { ICompareService, ICompareServiceResults } from "./compare.service"
+import { ICompareService } from "./compare.service"
 
 export interface IOffuscateService {
     offuscate(patient: Patient, message: string): Promise<string>
@@ -27,17 +27,18 @@ export class OffuscateService implements IOffuscateService {
     
     replaceIfNeeded(map: [string, unknown], message: string): string {
         return this.comparaisonsFunctions.reduce((acc, val) => {
-            const results = val(map[0], message)
+            const results = val(`${map[1]}`, message)
             if (!results) {
                 return acc
             }
 
+            return results.reduce((accR, valR) => {
+                if (valR.rate < 0.5) {
+                    return accR
+                }
 
-            if (results.rate < 0.5) {
-                return acc
-            }
-
-            return acc.replaceAll(message, results.matched)        
+                return accR.replaceAll(valR.matched, `[${map[0].toUpperCase()}]`)        
+            }, acc)
         }, message)
     }
    
@@ -45,6 +46,9 @@ export class OffuscateService implements IOffuscateService {
         const mapping = Object.entries(patient)
 
         return mapping.reduce<string>((acc, val) => {
+            if (typeof val[1] !== 'number' && typeof val[1] !== 'string') {
+                return acc
+            }
             return this.replaceIfNeeded(val, acc)
         }, message)         
     }    

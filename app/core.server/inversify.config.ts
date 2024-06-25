@@ -20,7 +20,7 @@ container.bind(TYPES.AuthService).to(Authentication).inSingletonScope()
 container.bind(TYPES.OllamaService).to(OllamaService).inSingletonScope()
 container.bind(TYPES.PatientRepository).to(PatientRepository).inSingletonScope()
 container.bind(TYPES.OffuscateService).to(OffuscateService).inSingletonScope()
-container.bind(TYPES.CompareService).to(IncludeCompare).inSingletonScope()
 container.bind(TYPES.CompareService).to(LevenshteinCompare).inSingletonScope()
+container.bind(TYPES.CompareService).to(IncludeCompare).inSingletonScope()
 
 export { container }

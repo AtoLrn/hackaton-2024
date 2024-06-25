@@ -18,7 +18,7 @@ export class PatientRepository implements IPatientRepository {
           "Antoine",
           "Lorin",
           "antoine.lorin2@gmail.com",
-          "99 Rue de conflans, Herblay",
+          "99 Rue de conflans Herblay",
           "+33621395898",
           [
             new Message(
@@ -26,11 +26,11 @@ export class PatientRepository implements IPatientRepository {
               true
             ),
             new Message(
-              "Bonjour Antoine, avez-vous d'autres symptômes tels que des courbatures, de la fatigue ou des frissons ? Avez-vous pris votre température ? Et pourriez-vous me confirmer votre adresse ?",
+              "Bonjour XXXXXAntoineXXXXX, avez-vous d'autres antoine.lorin2@gmail.com symptômes tels que des courbatures, de la fatigue ou des frissons ? Avez-vous pris votre température ? Et pourriez-vous me confirmer votre adresse ?",
               false
             ),
             new Message(
-              "Oui, j'ai aussi des courbatures et je me sens très fatigué. Ma température est de 38,5°C. Mon adresse est 99 Rue de conflans, Herblay.",
+              "Oui, j'ai aussi des courbatures et je me sens très fatigué. Ma température est de 38,5°C. Mon adresse est 99 Rue de conflans",
               true
             ),
             new Message(
@@ -42,7 +42,7 @@ export class PatientRepository implements IPatientRepository {
               true
             ),
             new Message(
-              "De rien Antoine, prenez soin de vous et n'hésitez pas à me recontacter si besoin. Bonne journée.",
+              "De rien Antioine, prenez soin de vous et n'hésitez pas à me recontacter si besoin. Bonne journée.",
               false
             )
           ]
@@ -52,7 +52,7 @@ export class PatientRepository implements IPatientRepository {
           "Sophie-Marie",
           "Hoehle",
           "sophie.marie.hoehle@gmail.com",
-          "102 Rue de conflans, Herblay",
+          "102 Rue de conflans Herblay",
           "+33622395898",
           [
             new Message(
@@ -60,7 +60,7 @@ export class PatientRepository implements IPatientRepository {
               true
             ),
             new Message(
-              "Bonjour Sophie-Marie, pourriez-vous me décrire l'intensité et la localisation précise de la douleur ? Est-ce que quelque chose aggrave ou soulage cette douleur ?",
+              "Bonjour Sophie-Mari, pourriez-vous me décrire l'intensité et la localisation précise de la douleur ? Est-ce que quelque chose aggrave ou soulage cette douleur ?",
               false
             ),
             new Message(
@@ -76,7 +76,7 @@ export class PatientRepository implements IPatientRepository {
               true
             ),
             new Message(
-              "Très bien, à bientôt Sophie-Marie. Prenez soin de vous en attendant.",
+              "Très bien, à bientôt Sophie-Marie. Prenez soin de vous en attendant. Hoohle",
               false
             )
           ]
