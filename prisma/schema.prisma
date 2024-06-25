@@ -34,4 +34,5 @@ model data {
   themeQuestion   Theme?    @relation("ThemeQuestion", fields: [themeQuestionId], references: [id])
   themeReponse    Theme?    @relation("ThemeReponse", fields: [themeReponseId], references: [id])
   note          Int @default(0)
+  isReponseConsistent Boolean @default(false)
 }

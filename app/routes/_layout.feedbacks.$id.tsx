@@ -3,6 +3,7 @@ import { Chart } from 'chart.js/auto';
 import { type MetaFunction } from "@remix-run/node";
 import { Kpi } from "~/components/kpi";
 import { useEffect, useRef } from 'react';
+import { NavLink } from '@remix-run/react';
 
 export const meta: MetaFunction = () => {
   return [
@@ -67,15 +68,15 @@ export default function Index() {
     <div className='flex flex-col gap-8'>
 
     <h1 className="font-bold text-4xl">Feedbacks</h1>
-    <div className="flex items-center gap-4">
-      <div className="rounded-lg shadow-xl bg-white p-4">
-        From 12. Dec to 19. Dec
-      </div>
-      <div className="rounded-lg shadow-xl bg-white p-4">
-        Weekly
-      </div>
+    <div className="flex justify-center gap-4">
+      <NavLink to={'/feedbacks/sante'} className="rounded-lg shadow-xl bg-white p-4">
+        Santé
+      </NavLink>
+      <NavLink to={'/feedbacks/satisfaction'} className="rounded-lg shadow-xl bg-white p-4">
+        Satisfaction
+      </NavLink>
     </div>
-    <div className="flex items-center gap-16">
+    <div className="flex justify-center items-center gap-16">
       <Kpi
         name="Open rate"
         rate={0.7}
