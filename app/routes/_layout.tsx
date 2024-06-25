@@ -12,7 +12,7 @@ export default function Layout ()  {
         <li>
           <NavLink to={'/patients'} className="flex duration-200 items-center gap-2 px-4 py-3 rounded-xl aria-[current]:bg-[#fb4f14] bg-slate-200 text-black aria-[current]:text-white font-bold">
           <TbNotes />
-            <span>
+          <span className="tracking-wider">
               Patients
             </span>
           </NavLink>
@@ -21,7 +21,7 @@ export default function Layout ()  {
         <li>
           <NavLink to={'/feedbacks'} className="flex duration-200 items-center gap-2 px-4 py-3 rounded-xl aria-[current]:bg-[#fb4f14] bg-slate-200 text-black aria-[current]:text-white font-bold">
           <BsGraphUp />
-            <span>
+            <span className="tracking-wider">
               Feedbacks
             </span>
           </NavLink>

@@ -88,11 +88,11 @@ export default function Index() {
       />
     </div>
     
-    <div className="rounded-lg flex flex-col w-full bg-white shadow-2xl p-12">
+    <div className="rounded-lg flex flex-col w-full bg-white shadow-xl p-12">
       <h3 className="font-bold text-2xl">Completions Rate</h3>
       <canvas className='h-96 max-h-96' ref={canvas} id='chart-completions-rate'></canvas>
     </div>
-    <div className="rounded-lg flex flex-col w-full bg-white shadow-2xl p-12">
+    <div className="rounded-lg flex flex-col w-full bg-white shadow-xl p-12">
     <h3 className="font-bold text-2xl">Unsure Answer Rate</h3>
       <canvas className='h-96 max-h-96' ref={unsureCanvas} id='chart-completions-rate'></canvas>
     </div>
