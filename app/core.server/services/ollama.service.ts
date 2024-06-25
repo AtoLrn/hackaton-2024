@@ -24,11 +24,11 @@ export class OllamaService implements Iollama {
         if (!this.isLoaded) {
             throw new ErrorLoadingTooEarly()
         }
-        const question = "CHU d'Angers : Suite à votre opération, si tout va bien, répondez TVB"
-        const response = "tout va bien mais j'ai un peu mal à la tête"
+        const question = "Centre F. Baclesse : Suite à votre intervention, si tout va bien répondez TVB, sinon répondez AID"
+        const response = "Je me suis coupé la main, je souffre énormément"
         const system = {
             role: 'system',
-            content: 'Tu es un expert de santé qui a plus de vingt ans d\'expérience et qui sait prendre en compte les retours de ses patients afin d\'en tirer des conclusions sur leur état de santé. Je vais te poser des questions et en fonction de la réponse donne moi un indicateur de 0 à 10 sur l\'état de santé du patient.'
+            content: 'Tu es un expert de santé qui a plus de vingt ans d\'expérience et qui sait prendre en compte les retours de ses patients afin d\'en tirer des conclusions sur leur état de santé. Je vais te poser des questions et en fonction de la réponse donne moi un indicateur de 0 à 10 sur l\'état de santé du patient au format {"indicateur_de_sante": int}.'
         }
         const prompt = {
             role: 'user',
