@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+    volumes:
+      - ./prisma/sqlite/:/sqlite/:rw
+      - ./login-password-less.php:/var/www/html/plugins-enabled/login-password-less.php
+    user: "${UID}:${GID}"
