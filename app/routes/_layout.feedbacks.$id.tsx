@@ -2,7 +2,7 @@
 import { Chart } from 'chart.js/auto';
 import { LoaderFunctionArgs, json, type MetaFunction } from "@remix-run/node";
 import { Kpi } from "~/components/kpi";
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { NavLink, useLoaderData } from '@remix-run/react';
 import { TYPES } from "~/core.server/infrastructure";
 import { container } from "~/core.server/inversify.config";
@@ -45,9 +45,24 @@ export default function Index() {
   const canvas = useRef<HTMLCanvasElement>(null)
   const unsureCanvas = useRef<HTMLCanvasElement>(null)
   const { dataList } = useLoaderData<typeof loader>()
+  const [noteAverage, setNoteAverage] = useState<number>(0)
+  const [consistency, setConsistency] = useState<number>(0)
 
-  console.log(dataList)
-  
+  useEffect(() => {
+    let globalScore = 0;
+    let unconsistentAnswers = 0
+
+    for (let i = 0; i < dataList.length; i++){
+      globalScore += dataList[i].note
+      if (dataList[i].themeReponseId !== dataList[i].themeQuestionId) {
+        unconsistentAnswers += 1
+      }
+    }
+
+    setNoteAverage(Math.floor((globalScore / dataList.length) * 10))
+    setConsistency(Math.floor(100 * unconsistentAnswers / dataList.length))
+  })
+
   useEffect(() => {
     if (!canvas.current) {
       return
@@ -100,7 +115,7 @@ export default function Index() {
   return <div className="w-full h-screen overflow-scroll p-16">
     <div className='flex flex-col gap-8'>
 
-    <h1 className="font-bold text-4xl">Feedbacks</h1>
+    <h1 className="font-bold text-4xl"></h1>
     <div className="flex justify-center gap-4">
       <NavLink to={'/feedbacks/sante'} className="rounded-lg shadow-xl bg-white p-4">
         Santé
@@ -114,14 +129,13 @@ export default function Index() {
     </div>
     <div className="flex justify-center items-center gap-16">
       <Kpi
-        name="Open rate"
-        rate={0.7}
+        name="Indice de satisfaction"
+        rate={noteAverage}
         progress={0.0102}
       />
       <Kpi
-        name="Click rate"
-        rate={0.23}
-        progress={-0.012}
+        name="Pourcentage inexploitable"
+        rate={consistency}
       />
     </div>
     
