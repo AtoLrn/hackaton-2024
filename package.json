@@ -8,6 +8,7 @@
     "dev": "node ./server.js",
     "lint": "eslint --ignore-path .gitignore --cache --cache-location ./node_modules/.cache/eslint .",
     "start": "cross-env NODE_ENV=production node ./server.js",
+    "seed": "node ./prisma/seed.js",
     "typecheck": "tsc"
   },
   "dependencies": {
@@ -19,6 +20,7 @@
     "bcryptjs": "^2.4.3",
     "chart.js": "^4.4.3",
     "compression": "^1.7.4",
+    "csv-parser": "^3.0.0",
     "express": "^4.18.2",
     "fast-levenshtein": "^3.0.0",
     "inversify": "^6.0.2",
