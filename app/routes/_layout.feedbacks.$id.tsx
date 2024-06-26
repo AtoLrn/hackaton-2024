@@ -37,14 +37,15 @@ export const loader = async ({params}: LoaderFunctionArgs) => {
   const dataList = await dataRepository.getDataByTheme(theme)
 
   return json({
-    dataList
+    dataList,
+    theme: id
   })
 }
 
 export default function Index() {
   const canvas = useRef<HTMLCanvasElement>(null)
   const unsureCanvas = useRef<HTMLCanvasElement>(null)
-  const { dataList } = useLoaderData<typeof loader>()
+  const { dataList, theme } = useLoaderData<typeof loader>()
   const [noteAverage, setNoteAverage] = useState<number>(0)
   const [consistency, setConsistency] = useState<number>(0)
 
@@ -64,6 +65,11 @@ export default function Index() {
   })
 
   useEffect(() => {
+    const data = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    for (let i = 0; i < dataList.length; i++){
+      data[dataList[i].note - 1]++
+    }
+
     if (!canvas.current) {
       return
     }
@@ -72,9 +78,10 @@ export default function Index() {
       type: 'bar',
       data: {
         datasets: [{
-          data: [20, 10],
+          label: "Nombre d'avis",
+          data: data,
         }],
-        labels: ['a', 'b']
+        labels: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']
       },
       options: {
         maintainAspectRatio: false,
@@ -85,20 +92,33 @@ export default function Index() {
     return () => {
       chart.destroy()
     }
-  }, [canvas]) 
+  }) 
   
   useEffect(() => {
+    const data = [0, 0]
+    for (let i = 0; i < dataList.length; i++){
+      if(dataList[i].themeQuestionId != dataList[i].themeReponseId) {
+        data[1]++
+      } else {
+        data[0]++
+      }
+    }
+
     if (!unsureCanvas.current) {
       return
     }
 
     const chart = new Chart(unsureCanvas.current, {
-      type: 'bar',
+      type: 'doughnut',
       data: {
         datasets: [{
-          data: [20, 10],
+          data: data,
+          backgroundColor: [
+            'rgb(0, 128, 0)',
+            'rgb(255, 0, 0)',
+          ]
         }],
-        labels: ['a', 'b']
+        labels: ['exploitables', 'inexploitables'],
       },
       options: {
         maintainAspectRatio: false,
@@ -109,13 +129,13 @@ export default function Index() {
     return () => {
       chart.destroy()
     }
-  }, [unsureCanvas]) 
+  }) 
   
 
   return <div className="w-full h-screen overflow-scroll p-16">
     <div className='flex flex-col gap-8'>
 
-    <h1 className="font-bold text-4xl"></h1>
+    <h1 className="font-bold text-4xl">{theme}</h1>
     <div className="flex justify-center gap-4">
       <NavLink to={'/feedbacks/sante'} className="rounded-lg shadow-xl bg-white p-4">
         Santé
@@ -140,11 +160,11 @@ export default function Index() {
     </div>
     
     <div className="rounded-lg flex flex-col w-full bg-white shadow-xl p-12">
-      <h3 className="font-bold text-2xl">Completions Rate</h3>
+      <h3 className="font-bold text-2xl">Indice de satisfaction</h3>
       <canvas className='h-96 max-h-96' ref={canvas} id='chart-completions-rate'></canvas>
     </div>
     <div className="rounded-lg flex flex-col w-full bg-white shadow-xl p-12">
-    <h3 className="font-bold text-2xl">Unsure Answer Rate</h3>
+    <h3 className="font-bold text-2xl">Réponses exploitables/inexploitables</h3>
       <canvas className='h-96 max-h-96' ref={unsureCanvas} id='chart-completions-rate'></canvas>
     </div>
     </div>

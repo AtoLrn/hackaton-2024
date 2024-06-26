@@ -20,7 +20,7 @@ export default function Index() {
         Satisfaction
       </NavLink>
       <NavLink to={'/feedbacks/information'} className="rounded-lg shadow-xl bg-white p-4">
-        Informations
+        Information
       </NavLink>
     </div>
     </div>
