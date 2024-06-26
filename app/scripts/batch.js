@@ -60,6 +60,42 @@ async function fetchSatisfactionIndicatorFromFeedback(ollama, question, response
     return parsedRes
 }
 
+async function fetchHealthResumeFromFeedback(ollama, feedbacks) {
+    const system = {
+        role: 'system',
+        content: `Tu es un expert de santé qui a plus de vingt ans d'expérience et qui sait prendre en compte les retours de ses patients afin d'en tirer des conclusions sur leur état de santé. Je vais te poser des questions et en fonction de la réponse donne moi un résumé sur l'état de santé du patient au format {"resume_de_sante": string}.`
+    };
+
+    let globalHealthResume = [];
+
+    for (const feedback of feedbacks) {
+        const { question, response } = feedback;
+
+        const prompt = {
+            role: 'user',
+            content: `Voici la question posée : "${question}", et voici la réponse donnée par le patient : "${response}".`
+        };
+
+        try {
+            const output = await ollama.chat({
+                model: 'mistral',
+                messages: [system, prompt],
+                format: 'json'
+            });
+
+            const parsedRes = JSON.parse(output.message.content);
+            console.log(parsedRes);
+
+            globalHealthResume.push(parsedRes.resume_de_sante);
+        } catch (error) {
+            console.error('Error fetching health resume:', error);
+            throw error;
+        }
+    }
+
+    return globalHealthResume.join(' ');
+}
+
 async function fetchDataFeedback() {
     const DBG = true
     const datas = await prisma.data.findMany({
@@ -130,10 +166,34 @@ async function fetchDataFeedback() {
                     datas.push(e.id)
                 }
                 break
-    
-            // case 3: //other
-            //     break
-    
+
+            case 3: // Health Resume
+                try {
+                    const feedbacks = [{ question: e.question, response: e.reponse }];
+                    const healthResume = await fetchHealthResumeFromFeedback(ollama, feedbacks);
+                    if (DBG) {
+                        console.log("------------------------Data " + (cpt + 1) + " / " + datas.length + " processing.------------------------");
+                        console.log("HEALTH RESUME\n")
+                        console.log("DataId : " + e.id + "\n")
+                        console.log("Health Resume : ");
+                        console.log(healthResume);
+                        console.log("------------------------Data processed.---------------------------------------------------");
+                    }
+
+                     await prisma.data.update({
+                       where: { id: e.id },
+                        data: {
+                            customField: healthResume.globalHealthResume,
+                       }
+                     });
+                } catch (error) {
+                    errorDatas.push({
+                        "element_id": e.id,
+                        "error": error
+                    });
+                }
+                break
+
             // case 4: //information
             //     break
         
