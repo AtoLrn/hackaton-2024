@@ -30,10 +30,7 @@ async function fetchThemes() {
  * IA RELATED
  */
 
-async isQuestionAnswerCohesive(question: string, answer: string, theme: object): Promise<unknown> {
-    if (!this.isLoaded) {
-        throw new ErrorLoadingTooEarly()
-    }
+async function isQuestionAnswerCohesive(question: string, answer: string, theme: object): Promise<unknown> {
     let themesArray = []
     for (let i = 0; i < theme.length; i++) {
         themesArray.push(theme[i].name)
@@ -54,10 +51,7 @@ async isQuestionAnswerCohesive(question: string, answer: string, theme: object):
     return output
 }
 
-async getThemeQuestion(question: string, theme: object): Promise<unknown> {
-    if (!this.isLoaded) {
-        throw new ErrorLoadingTooEarly()
-    }
+async function getThemeQuestion(question: string, theme: object): Promise<unknown> {
     let themesArray = []
     for (let i = 0; i < theme.length; i++) {
         themesArray.push(theme[i].name)
@@ -78,10 +72,7 @@ async getThemeQuestion(question: string, theme: object): Promise<unknown> {
     return output
 }
 
-async getThemeAnswer(answer: string, theme: object): Promise<unknown> {
-    if (!this.isLoaded) {
-        throw new ErrorLoadingTooEarly()
-    }
+async function getThemeAnswer(answer: string, theme: object): Promise<unknown> {
     let themesArray = []
     for (let i = 0; i < theme.length; i++) {
         themesArray.push(theme[i].name)
@@ -102,10 +93,7 @@ async getThemeAnswer(answer: string, theme: object): Promise<unknown> {
     return output
 }
 
-async doesTheAnswerIsUsable(answer: string): Promise<unknown> {
-    if (!this.isLoaded) {
-        throw new ErrorLoadingTooEarly()
-    }
+async function doesTheAnswerIsUsable(answer: string): Promise<unknown> {
     const system = {
         role: 'system',
         content: 'Tu es un expert de santé qui a plus de vingt ans d\'expérience et qui sait prendre en compte les retours de ses patients afin d\'en tirer des conclusions sur leur état de santé. Je vais te poser une réponse et tu dois me dire si elle est compréhensible et ou utilisable pour obtenir le theme de cette réponse, cest à dire ou non, répond par "oui" si la réponse est utilisable, sinon "non, je veux une réponse dans le format : { "usable": "oui" } ou { "usable": "non" }.'
