@@ -5,6 +5,12 @@ const prisma = new PrismaClient();
 async function fetchQuestions() {
     const questions = await prisma.data.findMany({
         take: 2,
+        where: {
+            id: { equals: 41 },
+            themeQuestionId: null,
+            themeReponseId: null,
+            reponse: { not: null },
+        }
     });
     return questions;
 }
