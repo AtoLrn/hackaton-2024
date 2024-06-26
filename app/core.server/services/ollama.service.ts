@@ -1,6 +1,7 @@
 import { Ollama } from 'ollama'
 import { injectable } from "inversify";
 import { ErrorLoadingTooEarly } from '../errors';
+import { parse } from 'postcss';
 
 export interface Iollama {
     loadData(data: unknown): Promise<unknown>
@@ -50,6 +51,11 @@ export class OllamaService implements Iollama {
         })
 
         const parsedRes = JSON.parse(output.message.content)
+
+        if (typeof parsedRes.health_indicator !== "undefined" && typeof parsedRes.health_indicator !== "number") {
+            
+        }
+
         return parsedRes
     }
 
@@ -82,6 +88,11 @@ export class OllamaService implements Iollama {
         })
 
         const parsedRes = JSON.parse(output.message.content)
+
+        if (typeof parsedRes.satisfaction_indicator !== "undefined" && typeof parsedRes.satisfaction_indicator !== "number") {
+            
+        }
+
         return parsedRes
     }
 }

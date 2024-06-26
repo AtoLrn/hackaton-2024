@@ -61,30 +61,31 @@ async function fetchSatisfactionIndicatorFromFeedback(ollama, question, response
 }
 
 async function fetchDataFeedback() {
-    const DBG = true;
+    const DBG = true
     const datas = await prisma.data.findMany({
         where: {
             exploitable: true,
             note: 0,
         }
-    });
+    })
 
-    let errorDatas = [];
-    let cpt = 0;
+    let errorDatas = []
+    let cpt = 0
     await datas.forEach(async e => {
-        let indicator = false;
+        let indicator = false
         switch (e.themeReponseId) {
             case 1: //health
                 try {
                     indicator = await fetchHealthIndicatorFromFeedback(ollama, e.question, e.reponse)
-                    console.log("------------------------Data "+(cpt+1)+" / "+datas.length+" processing.------------------------");
                     if ( DBG ) {
+                        console.log("------------------------Data "+(cpt+1)+" / "+datas.length+" processing.------------------------");
                         console.log("HEALTH\n")
                         console.log("DataId : "+e.id+"\n")
                         console.log("Question : "+e.question+"\n")
                         console.log("Reponse : "+e.reponse+"\n")
                         console.log("Indicator : ")
                         console.log(indicator)
+                        console.log("------------------------Data processed.---------------------------------------------------");
                     }
                     
                     if (typeof indicator.health_indicator === 'number') {
@@ -95,26 +96,26 @@ async function fetchDataFeedback() {
                             }
                         })
                     }
-                    console.log("------------------------Data processed.---------------------------------------------------");
                 } catch (error) {
                     errorDatas.push({
                         "element_id":e.id,
                         "error": error
-                    });
+                    })
                 }
-                break;
+                break
             
             case 2: //satisfaction
                 try {
                     indicator = await fetchSatisfactionIndicatorFromFeedback(ollama, e.question, e.reponse)
-                    console.log("------------------------Data "+(cpt+1)+" / "+datas.length+" processing.------------------------");
                     if ( DBG ) {
+                        console.log("------------------------Data "+(cpt+1)+" / "+datas.length+" processing.------------------------");
                         console.log("SATISFACTION\n")
                         console.log("DataId : "+e.id+"\n")
                         console.log("Question : "+e.question+"\n")
                         console.log("Reponse : "+e.reponse+"\n")
                         console.log("Indicator : ")
                         console.log(indicator)
+                        console.log("------------------------Data processed.---------------------------------------------------")
                     }
                     
                     if (typeof indicator.satisfaction_indicator === 'number') {
@@ -125,24 +126,23 @@ async function fetchDataFeedback() {
                             }
                         })
                     }
-                    console.log("------------------------Data processed.---------------------------------------------------");
                 } catch (error) {
-                    datas.push(e.id);
+                    datas.push(e.id)
                 }
-                break;
+                break
     
             // case 3: //other
-            //     break;
+            //     break
     
             // case 4: //information
-            //     break;
+            //     break
         
             default:
-                console.log("------------------------Data "+(cpt+1)+" / "+datas.length+" skipped.----------------------------------");
-                break;
+                console.log("------------------------Data "+(cpt+1)+" / "+datas.length+" skipped.----------------------------------")
+                break
         }
-        cpt++;
-    });
+        cpt++
+    })
 
     if (DBG && errorDatas.length > 0) {
         console.log("\n-----------------------------------------------------------------------------------------")
@@ -150,7 +150,7 @@ async function fetchDataFeedback() {
         console.log(errorDatas)
         console.log("\n-----------------------------------------------------------------------------------------\n")
     }
-    return datas;
+    return datas
 }
 
 const datas = await fetchDataFeedback()
