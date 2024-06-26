@@ -44,8 +44,8 @@ export default function Index() {
             <IoIosCall size={24} />
           </section>
         </div>
-        <span className="tracking-widest">30 year old - 17 April 2024</span>
-        <span className="tracking-widest">30 year old - 17 April 2024</span>
+        <span className="tracking-widest">{patient.email}</span>
+        <span className="tracking-widest">{patient.address}</span>
       </div>
       <div className="aspect-square bg-[#f9faff] gap-4 flex items-center flex-col justify-center">
         <span className="text-2xl font-bold tracking-widest">12/04</span>
@@ -61,6 +61,5 @@ export function ErrorBoundary() {
   return <div className="w-full h-full flex flex-col gap-4 items-center justify-center">
   <h1 className="text-4xl font-bold">The patient has not been found</h1>
   <span className="text-xl">Select a patient on the left panel</span>
-  
 </div>
 }

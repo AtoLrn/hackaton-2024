@@ -9,4 +9,5 @@ export const TYPES = {
     PatientRepository: Symbol.for('PatientRepository'),
     OffuscateService: Symbol.for('OffuscateService'),
     CompareService: Symbol.for('CompareService'),
+    CompareSingleService: Symbol.for('CompareSingleService')
 }

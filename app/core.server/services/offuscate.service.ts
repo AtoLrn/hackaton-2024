@@ -1,7 +1,8 @@
 import { injectable, multiInject } from "inversify"
 import { Patient } from "../entities/patient.entity"
 import { TYPES } from "../infrastructure"
-import { ICompareService } from "./compare.service"
+import { ICompareService, ICompareSingleService } from "./compare.service"
+import { MemoryLruService } from "./lru.service"
 
 export interface IOffuscateService {
     offuscate(patient: Patient, message: string): Promise<string>
@@ -17,11 +18,16 @@ export interface IOffuscateServiceComparaison {
 // https://fr.wikipedia.org/wiki/Distance_de_Levenshtein
 @injectable()
 export class OffuscateService implements IOffuscateService {
+    private lru: MemoryLruService<string>
     private comparaisonsFunctions: ICompareService['compare'][] = []
+    private comparaisonsSingleFunctions: ICompareSingleService['compare'][] = []
 
     public constructor(
-        @multiInject(TYPES.CompareService) comparaisons: ICompareService[]
+        @multiInject(TYPES.CompareService) comparaisons: ICompareService[],
+        @multiInject(TYPES.CompareSingleService) singleComparaisons: ICompareSingleService[]
     ) {
+        this.lru = new MemoryLruService<string>()
+        this.comparaisonsSingleFunctions = singleComparaisons.map(({ compare }) => compare)
         this.comparaisonsFunctions = comparaisons.map(({ compare }) => compare)
     }
     
@@ -43,13 +49,45 @@ export class OffuscateService implements IOffuscateService {
     }
    
     async offuscate(patient: Patient, message: string): Promise<string> {
-        const mapping = Object.entries(patient)
+        const cached = this.lru.get(message)
 
-        return mapping.reduce<string>((acc, val) => {
+        if (cached) {
+            return cached
+        }
+
+        const mapping = Object.entries(patient)
+        const mappingKeys = Object.keys(patient).map(s => s.toUpperCase())
+
+        const firstRoundMessage = mapping.reduce<string>((acc, val) => {
             if (typeof val[1] !== 'number' && typeof val[1] !== 'string') {
                 return acc
             }
             return this.replaceIfNeeded(val, acc)
-        }, message)         
+        }, message)  
+        
+        
+        const result = await this.comparaisonsSingleFunctions.reduce(async (acc, val) => {
+            const results = await val(await acc)
+
+            if (!results) {
+                return acc
+            }
+
+            return await results.reduce(async (accR, valR) => {
+                if (mappingKeys.includes(valR.matched)) {
+                    return await accR
+
+                }
+
+                if (valR.rate < 0.5) {
+                    return await accR
+                }
+
+                return (await accR).replaceAll(valR.matched, `[AI]`)        
+            }, acc)
+        }, Promise.resolve(firstRoundMessage))
+
+        this.lru.set(message, result)
+        return result
     }    
 }

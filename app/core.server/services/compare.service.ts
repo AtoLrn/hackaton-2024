@@ -1,8 +1,15 @@
 import levenshtein from 'fast-levenshtein'
-import { injectable } from "inversify"
+import { inject, injectable } from "inversify"
+import { TYPES } from '../infrastructure'
+import { OllamaService } from './ollama.service'
+import { Ollama } from 'ollama'
 
 export interface ICompareService {
     compare(stringA: string, stringB: string): ICompareServiceResults[] | undefined  
+}
+
+export interface ICompareSingleService {
+    compare(string: string): Promise<ICompareServiceResults[] | undefined>  
 }
 
 export interface ICompareServiceResults {
@@ -21,6 +28,38 @@ export class IncludeCompare implements ICompareService {
         }
 
         return undefined
+    }
+}
+
+@injectable()
+export class OllamaCompare implements ICompareSingleService {
+    private ollama: Ollama
+    public constructor(@inject(TYPES.OllamaService) ollama: OllamaService) {
+        this.ollama = ollama.ollama
+    }
+
+    public compare = async (message: string): Promise<ICompareServiceResults[] | undefined> => {        
+        const systems = [
+            {
+                role: 'system',
+                content: "Tu dois supprimer toutes les informations personnelles mais absolument conserver les informations médicales dans le message. Tu dois ignorer les mots qui suivent ce modèle \\[[A-Z]+\\] car ils représentent des données déjà anonymisées. Vous devez retourner la chaîne qui correspond à une information personnelle sous le format suivant: {\"results\": [{\"matched\": \"string\", \"rate\": float}]"
+            },   
+        ]
+
+        const prompt = {
+            role: 'user',
+            content : `${message}`
+        }
+
+        const output = await this.ollama.chat({
+            model: 'llama3',
+            messages: [...systems, prompt],
+            format: 'json'
+        })
+
+        const results = JSON.parse(output.message.content) as { results: ICompareServiceResults[] }
+
+        return results.results
     }
 }
 
