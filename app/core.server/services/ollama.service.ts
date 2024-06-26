@@ -1,12 +1,13 @@
+import { inject, injectable } from "inversify"
+import { Data } from "../entities/data.entity"
+import { TYPES } from "../infrastructure"
+import { IDataRepository } from "../repositories/data.repository"
 import { Ollama } from 'ollama'
-import { injectable } from "inversify";
-import { ErrorLoadingTooEarly } from '../errors';
-import { parse } from 'postcss';
 
 export interface Iollama {
     loadData(data: unknown): Promise<unknown>
-    refetchHealthIndicatorFromFeedback(question: string, response: string, indicator: number, additional_info: string): Promise<unknown>
-    refetchSatisfactionIndicatorFromFeedback(question: string, response: string, indicator: number, additional_info: string): Promise<unknown>
+    refetchHealthIndicatorFromFeedback(data: Data, indicator: number): Promise<unknown>
+    refetchSatisfactionIndicatorFromFeedback(data: Data, indicator: number): Promise<unknown>
 }
 
 @injectable()
@@ -14,7 +15,9 @@ export class OllamaService implements Iollama {
     ollama: Ollama
     isLoaded = false
     
-    constructor() {
+    constructor(
+        @inject(TYPES.DataRepository) private dataRepository: IDataRepository
+    ) {
         this.ollama = new Ollama({ host: 'http://localhost:11434' })
         this.isLoaded = true
     }
@@ -22,7 +25,7 @@ export class OllamaService implements Iollama {
         throw new Error('Method not implemented.');
     }
 
-    async refetchHealthIndicatorFromFeedback(question: string, response: string, indicator: number, additional_info: string): Promise<unknown>
+    async refetchHealthIndicatorFromFeedback(data: Data, indicator: number): Promise<unknown>
     {
         const system = {
             role: 'system',
@@ -38,11 +41,11 @@ export class OllamaService implements Iollama {
         }
         const systemAdditionalInfo = {
             role: 'system',
-            content: 'Ce couple de question réponse a déà reçu un indicateur de santé. Le personnel de santé a éstimé que cet indicateur qui était de '+indicator+' était incorrect. Voici les informations supplémentaires que le personnel de santé a donné : '+additional_info+'.'
+            content: 'Ce couple de question réponse a déà reçu un indicateur de santé. Le personnel de santé a éstimé que cet indicateur qui était de '+indicator+' était incorrect.'
         }
         const prompt = {
             role: 'user',
-            content : 'Voici la question posée : "'+question+'"(si la question contient une échelle différente, ignore l\'échelle donnée dans la question ne renvoie qu\'une note de 1 à 10), et voici la réponse donnée par le patient : "'+response+'".'
+            content : 'Voici la question posée : "'+data.question+'"(si la question contient une échelle différente, ignore l\'échelle donnée dans la question ne renvoie qu\'une note de 1 à 10), et voici la réponse donnée par le patient : "'+data.reponse+'".'
         }
         const output = await this.ollama.chat({
             model: 'mistral',
@@ -53,13 +56,13 @@ export class OllamaService implements Iollama {
         const parsedRes = JSON.parse(output.message.content)
 
         if (typeof parsedRes.health_indicator !== "undefined" && typeof parsedRes.health_indicator !== "number") {
-            
+            const updatedData = await this.dataRepository.updateDataNoteById(data, parsedRes.health_indicator);
         }
 
         return parsedRes
     }
 
-    async refetchSatisfactionIndicatorFromFeedback(question: string, response: string, indicator: number, additional_info: string): Promise<unknown> 
+    async refetchSatisfactionIndicatorFromFeedback(data: Data, indicator: number): Promise<unknown> 
     {
         const system = {
             role: 'system',
@@ -75,11 +78,11 @@ export class OllamaService implements Iollama {
         }
         const systemAdditionalInfo = {
             role: 'system',
-            content: 'Ce couple de question réponse a déà reçu un indicateur de satisfaction. Le personnel de santé a éstimé que cet indicateur qui était de '+indicator+' était incorrect. Voici les informations supplémentaires que le personnel de santé a donné : '+additional_info+'.'
+            content: 'Ce couple de question réponse a déà reçu un indicateur de satisfaction. Le personnel de santé a éstimé que cet indicateur qui était de '+indicator+' était incorrect.'
         }
         const prompt = {
             role: 'user',
-            content : 'Voici la question posée :  "'+question+'" (si la question contient une échelle différente, ignore l\'échelle donnée dans la question ne renvoie qu\'une note de 1 à 10), et voici la réponse donnée par le patient : "'+response+'".'
+            content : 'Voici la question posée :  "'+data.question+'" (si la question contient une échelle différente, ignore l\'échelle donnée dans la question ne renvoie qu\'une note de 1 à 10), et voici la réponse donnée par le patient : "'+data.reponse+'".'
         }
         const output = await this.ollama.chat({
             model: 'mistral',
@@ -90,7 +93,7 @@ export class OllamaService implements Iollama {
         const parsedRes = JSON.parse(output.message.content)
 
         if (typeof parsedRes.satisfaction_indicator !== "undefined" && typeof parsedRes.satisfaction_indicator !== "number") {
-            
+            const updatedData = await this.dataRepository.updateDataNoteById(data, parsedRes.satisfaction_indicator);
         }
 
         return parsedRes

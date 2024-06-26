@@ -7,6 +7,7 @@ import { Data } from '../entities/data.entity';
 
 export interface IDataRepository {
     getDataByTheme(theme: string): Promise<Data[]>
+    updateDataNoteById(data: Data, note: number): Promise<Data>
 }
 
 @injectable()
@@ -36,5 +37,18 @@ export class DataRepository implements IDataRepository {
       });
 
       return dataList.map(data => Data.ToData(data))
+    }
+
+    async updateDataNoteById(data: Data, note: number): Promise<Data> {
+      const updatedData = await this.data.update({
+        where: {
+          id: data.id
+        },
+        data: {
+          note
+        }
+      });
+
+      return updatedData
     }
 }
