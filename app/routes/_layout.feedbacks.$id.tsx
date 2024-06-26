@@ -1,9 +1,12 @@
 // import { BarChart } from "@mui/x-charts";
 import { Chart } from 'chart.js/auto';
-import { type MetaFunction } from "@remix-run/node";
+import { LoaderFunctionArgs, json, type MetaFunction } from "@remix-run/node";
 import { Kpi } from "~/components/kpi";
 import { useEffect, useRef } from 'react';
-import { NavLink } from '@remix-run/react';
+import { NavLink, useLoaderData } from '@remix-run/react';
+import { TYPES } from "~/core.server/infrastructure";
+import { container } from "~/core.server/inversify.config";
+import { IDataRepository } from '~/core.server/repositories/data.repository';
 
 export const meta: MetaFunction = () => {
   return [
@@ -11,9 +14,39 @@ export const meta: MetaFunction = () => {
   ]
 }
 
+export const loader = async ({params}: LoaderFunctionArgs) => {
+  const dataRepository = container.get<IDataRepository>(TYPES.DataRepository)
+
+  const id = params['id']
+  let theme;
+
+  switch (id) {
+    case "sante":
+      theme = "HEALTH"
+      break
+    case "satisfaction":
+      theme = "SATISFACTION"
+      break
+    case "information":
+      theme = "INFORMATION"
+      break
+    default:
+      theme = "OTHER"
+  }
+
+  const dataList = await dataRepository.getDataByTheme(theme)
+
+  return json({
+    dataList
+  })
+}
+
 export default function Index() {
   const canvas = useRef<HTMLCanvasElement>(null)
   const unsureCanvas = useRef<HTMLCanvasElement>(null)
+  const { dataList } = useLoaderData<typeof loader>()
+
+  console.log(dataList)
   
   useEffect(() => {
     if (!canvas.current) {
@@ -74,6 +107,9 @@ export default function Index() {
       </NavLink>
       <NavLink to={'/feedbacks/satisfaction'} className="rounded-lg shadow-xl bg-white p-4">
         Satisfaction
+      </NavLink>
+      <NavLink to={'/feedbacks/information'} className="rounded-lg shadow-xl bg-white p-4">
+        Informations
       </NavLink>
     </div>
     <div className="flex justify-center items-center gap-16">

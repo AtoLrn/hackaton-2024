@@ -10,10 +10,12 @@ import { OllamaService } from './services/ollama.service'
 import { PatientRepository } from './repositories/patient.repository'
 import { OffuscateService } from './services/offuscate.service'
 import { IncludeCompare, LevenshteinCompare } from './services/compare.service'
+import { DataRepository } from './repositories/data.repository'
 
 const container = new Container()
 container.bind(TYPES.PrismaConnector).to(PrismaConnector).inSingletonScope()
 container.bind(TYPES.UserRepository).to(UserRepository).inSingletonScope()
+container.bind(TYPES.DataRepository).to(DataRepository).inSingletonScope()
 container.bind(TYPES.BcryptService).to(Bcrypt).inSingletonScope()
 container.bind(TYPES.JwtService).to(Jwt).inSingletonScope()
 container.bind(TYPES.AuthService).to(Authentication).inSingletonScope()

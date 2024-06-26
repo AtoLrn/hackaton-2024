@@ -19,6 +19,9 @@ export default function Index() {
       <NavLink to={'/feedbacks/satisfaction'} className="rounded-lg shadow-xl bg-white p-4">
         Satisfaction
       </NavLink>
+      <NavLink to={'/feedbacks/information'} className="rounded-lg shadow-xl bg-white p-4">
+        Informations
+      </NavLink>
     </div>
     </div>
   </div>

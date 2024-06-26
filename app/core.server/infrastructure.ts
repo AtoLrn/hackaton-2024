@@ -1,5 +1,6 @@
 export const TYPES = {
     UserRepository: Symbol.for('UserRepository'),
+    DataRepository: Symbol.for('DataRepository'),
     PrismaConnector: Symbol.for('PrismaConnector'),
     BcryptService: Symbol.for('BcryptService'),
     JwtService: Symbol.for('JwtService'),

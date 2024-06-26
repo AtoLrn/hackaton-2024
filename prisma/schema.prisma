@@ -19,7 +19,7 @@ model User {
 
 model Theme {
   id        Int      @id @default(autoincrement())
-  name      String
+  name      String   @unique
   themeQuestions data[] @relation("ThemeQuestion")
   themeReponses  data[] @relation("ThemeReponse")
 }
