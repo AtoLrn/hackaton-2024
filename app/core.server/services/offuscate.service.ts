@@ -56,7 +56,7 @@ export class OffuscateService implements IOffuscateService {
         }
 
         const mapping = Object.entries(patient)
-        const mappingKeys = Object.keys(patient).map(s => s.toUpperCase())
+        const mappingKeys = Object.keys(patient).flatMap(s =>[`[${s.toUpperCase()}]`, s.toUpperCase()])
 
         const firstRoundMessage = mapping.reduce<string>((acc, val) => {
             if (typeof val[1] !== 'number' && typeof val[1] !== 'string') {

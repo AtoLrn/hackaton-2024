@@ -1,8 +1,47 @@
-import { NavLink, Outlet } from "@remix-run/react"
+import { Link, NavLink, Outlet } from "@remix-run/react"
+import { createContext, useCallback, useState } from "react";
 import { BsGraphUp } from "react-icons/bs"
 import { TbNotes } from "react-icons/tb"
+import { Patient } from "~/core.server/entities/patient.entity";
+
+export type Subscriptions = string[]
+
+export const SubscritionContext = createContext<{
+  addSubscription: (id: string, cb: () => void) =>void
+} | null>(null);
+
 
 export default function Layout ()  {
+  const [ patients, setPatiens ] = useState<Patient[]>([])
+
+  const subscribe = useCallback((s: string) => {
+    return new Promise<Patient>((resolve) => {
+      const sse = new EventSource(`/patients/${s}/anonymize`)
+  
+      sse.onerror = () => {
+        sse.close()
+      }
+  
+      sse.onmessage = (event) => {
+        const patient = JSON.parse(event.data) as Patient
+        resolve(patient)
+      }
+    })
+   
+  }, [])
+
+
+  const addSubscription = useCallback((id: string, cb: () => void) => {
+    subscribe(id).then((patient) => {
+      setPatiens((p) => [
+        ...p,
+        patient
+      ])
+      cb()
+    })
+  }, [])
+
+
     return <main className="w-full h-screen flex bg-[#f9faff]">
     <nav className="h-screen w-80 flex flex-col justify-between items-stretch gap-12 bg-white">
       <h1 className="w-full h-32 flex items-center px-8">
@@ -38,7 +77,20 @@ export default function Layout ()  {
           </div>
       </section>
     </nav>
-    <Outlet />
+    <SubscritionContext.Provider value={{ addSubscription }}>
+      <Outlet context={{ addSubscription }} />
+    </SubscritionContext.Provider>
+    <div className="absolute bottom-4 right-4 max-w-96">
+      <ul className="flex flex-col-reverse gap-4">
+      { patients.map((p) => {
+          return <li className="bg-[#fb4f14] text-white text-lg tracking-wider shadow-lg px-8 py-4 rounded-lg" key={p.id}>
+            Click <a className="text-blue-600 underline" download={`anonymized-discussion-${p.id}.txt`} href={`data:text/plain;charset=utf-8,${encodeURIComponent(p.messages.reduce((acc, val) => {
+              return `${acc}${val.fromUser ? 'Patient' : 'Infirmier' }: ${val.content}\n`
+            }, ''))}`}>Here</a> to export the patient <b>#{p.id}</b> ({p.name} {p.lastname}) anonymized messages
+          </li>
+      } )}
 
+      </ul>
+    </div>
   </main> 
 }

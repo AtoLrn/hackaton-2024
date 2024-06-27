@@ -3,6 +3,7 @@ import { inject, injectable } from "inversify"
 import { TYPES } from '../infrastructure'
 import { OllamaService } from './ollama.service'
 import { Ollama } from 'ollama'
+import Zod from 'zod'
 
 export interface ICompareService {
     compare(stringA: string, stringB: string): ICompareServiceResults[] | undefined  
@@ -33,33 +34,56 @@ export class IncludeCompare implements ICompareService {
 
 @injectable()
 export class OllamaCompare implements ICompareSingleService {
+    static model = Zod.object({
+        results: Zod.array(Zod.object({
+            matched: Zod.string(),
+            rate: Zod.number(),
+        }))
+    })
     private ollama: Ollama
     public constructor(@inject(TYPES.OllamaService) ollama: OllamaService) {
         this.ollama = ollama.ollama
     }
 
     public compare = async (message: string): Promise<ICompareServiceResults[] | undefined> => {        
-        const systems = [
-            {
+        const system = {
                 role: 'system',
-                content: "Tu dois supprimer toutes les informations personnelles mais absolument conserver les informations médicales dans le message. Tu dois ignorer les mots qui suivent ce modèle \\[[A-Z]+\\] car ils représentent des données déjà anonymisées. Vous devez retourner la chaîne qui correspond à une information personnelle sous le format suivant: {\"results\": [{\"matched\": \"string\", \"rate\": float}]"
-            },   
-        ]
-
+                content: `Extract the personals informations in the provided texts with the following rules:
+- Match only informations that correspond to PII (Personally identifiable information)
+- Ignore the medicals informations
+- Ignore the pronouns
+- Ignore the subjects
+- Do not match the words that follow this pattern [UPPERCASE]
+- Answer in this pattern where matched is the string to replace and rate the trust rate: {"results": [{"matched": "string", "rate": float}]`
+        }
+        
         const prompt = {
             role: 'user',
             content : `${message}`
         }
 
-        const output = await this.ollama.chat({
-            model: 'llama3',
-            messages: [...systems, prompt],
-            format: 'json'
-        })
+        try {
+            const output = await this.ollama.chat({
+                model: 'llama3',
+                messages: [
+                    system, 
+                    // assistant, 
+                    prompt
+                ],
+                format: 'json'
+            })
 
-        const results = JSON.parse(output.message.content) as { results: ICompareServiceResults[] }
+            const results = JSON.parse(output.message.content) as unknown
+            
+            const parsed = OllamaCompare.model.parse(results)
 
-        return results.results
+            console.log(message, parsed)
+
+            return parsed.results
+        } catch {
+            return []
+        }
+        
     }
 }
 

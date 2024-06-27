@@ -11,6 +11,7 @@ import { PatientRepository } from './repositories/patient.repository'
 import { OffuscateService } from './services/offuscate.service'
 import { DataRepository } from './repositories/data.repository'
 import { IncludeCompare, LevenshteinCompare, OllamaCompare } from './services/compare.service'
+import { MemoryQueueService } from './services/queue.service'
 
 const container = new Container()
 container.bind(TYPES.PrismaConnector).to(PrismaConnector).inSingletonScope()
@@ -25,5 +26,6 @@ container.bind(TYPES.CompareService).to(LevenshteinCompare).inSingletonScope()
 container.bind(TYPES.CompareService).to(IncludeCompare).inSingletonScope()
 container.bind(TYPES.CompareSingleService).to(OllamaCompare).inSingletonScope()
 container.bind(TYPES.OffuscateService).to(OffuscateService).inSingletonScope()
+container.bind(TYPES.QueueService).to(MemoryQueueService).inSingletonScope()
 
 export { container }

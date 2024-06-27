@@ -1,12 +1,11 @@
-import { LoaderFunctionArgs, defer, type MetaFunction } from "@remix-run/node";
-import { Await, useLoaderData } from "@remix-run/react";
-import { Suspense } from "react";
-import { Message } from "~/core.server/entities/message.entity";
-import { Patient } from "~/core.server/entities/patient.entity";
+import { LoaderFunctionArgs, json, type MetaFunction } from "@remix-run/node";
+import { Await,  useFetcher, useLoaderData, useOutletContext } from "@remix-run/react";
+import { Suspense, useEffect, useState } from "react";
 import { TYPES } from "~/core.server/infrastructure";
 import { container } from "~/core.server/inversify.config";
 import { IPatientRepository } from "~/core.server/repositories/patient.repository";
-import { IOffuscateService } from "~/core.server/services/offuscate.service";
+import { Subscriptions } from "./_layout";
+import { action } from "./_layout.patients.$id.anonymize";
 
 export const loader = async ({ params }: LoaderFunctionArgs) => {
   const id = params['id']
@@ -18,27 +17,11 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
   }
 
   const patientRepository = container.get<IPatientRepository>(TYPES.PatientRepository)
-  const offuscateService = container.get<IOffuscateService>(TYPES.OffuscateService)
 
   const patient = await patientRepository.getById(parseInt(id))
 
-  const patientAnonymized = new Promise<Patient>((resolve) => {
-    Promise.all(patient.messages.map(async ({ content, fromUser }) => {
-      return new Message(
-        await offuscateService.offuscate(patient, content),
-        fromUser
-      )
-    })).then((messages) => {
-      resolve({
-        ...patient,
-        messages: messages
-      })
-    })
-  })
-
-
-  return defer({
-    patient: patientAnonymized
+  return json({
+    patient
   })
 }
 
@@ -49,11 +32,32 @@ export const meta: MetaFunction = () => {
 };
 
 export default function Index() {
+  const subscriptions = useOutletContext<{
+    subscriptions: Subscriptions,
+    addSubscription: (id: string, cb: () => void) =>void
+  }>()
+  const fetcher = useFetcher<typeof action>()
   const { patient } = useLoaderData<typeof loader>()
+  const [ loading, setLoading ] = useState(false)
+
+  useEffect(() => {
+    if (fetcher.data) {
+      subscriptions.addSubscription(fetcher.data.id, () => setLoading(false))
+      
+      setLoading(true)
+    }
+    
+  }, [fetcher.data])
+
 
   return <div className="flex-1 p-12 flex items-stretch justify-stretch gap-12">
       <div className="flex-1 bg-[#f9faff] shadow-lg rounded-md p-8 flex flex-col gap-4">
-        <h1 className="tracking-wider text-xl font-bold">Chat</h1>
+        <div className="flex items-center justify-between">
+          <h1 className="tracking-wider text-xl font-bold">Chat</h1>
+          <fetcher.Form method="POST" action={`/patients/${patient.id}/anonymize`}>
+            <button className="px-4 py-2 bg-[#fb4f14] text-white rounded-md shadow-md" disabled={fetcher.state === 'submitting' || loading}>{fetcher.state !== 'submitting' && !loading ? 'Export' : 'Exporting...'}</button>
+          </fetcher.Form>
+        </div>
         
         <Suspense fallback={<div>Loading...</div>}>
           <Await resolve={patient}>

@@ -1,5 +1,5 @@
 import { LoaderFunctionArgs, json, type MetaFunction } from "@remix-run/node";
-import { Link, Outlet, useLoaderData } from "@remix-run/react";
+import { Link, Outlet, useLoaderData, useOutletContext } from "@remix-run/react";
 import { IoIosCall, IoIosSend } from "react-icons/io";
 import { TYPES } from "~/core.server/infrastructure";
 import { container } from "~/core.server/inversify.config";
@@ -30,6 +30,8 @@ export const meta: MetaFunction = () => {
 };
 
 export default function Index() {
+  const context = useOutletContext()
+
   const { patient } = useLoaderData<typeof loader>()
 
   return <div className="w-full h-full flex flex-col">
@@ -52,7 +54,7 @@ export default function Index() {
         <span className="tracking-widest">Next visit</span>
       </div>
     </div>
-    <Outlet />
+    <Outlet context={context} />
   </div>
 }
 

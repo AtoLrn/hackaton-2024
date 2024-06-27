@@ -8,6 +8,7 @@ export const TYPES = {
     OllamaService: Symbol.for('OllamaService'),
     PatientRepository: Symbol.for('PatientRepository'),
     OffuscateService: Symbol.for('OffuscateService'),
+    QueueService: Symbol.for('QueueService'),
     CompareService: Symbol.for('CompareService'),
     CompareSingleService: Symbol.for('CompareSingleService')
 }

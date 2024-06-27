@@ -1,5 +1,5 @@
 import { json, type MetaFunction } from "@remix-run/node";
-import { NavLink, Outlet, useLoaderData } from "@remix-run/react";
+import { NavLink, Outlet, useLoaderData, useOutletContext } from "@remix-run/react";
 import { TYPES } from "~/core.server/infrastructure";
 import { container } from "~/core.server/inversify.config";
 import { IPatientRepository } from "~/core.server/repositories/patient.repository";
@@ -22,6 +22,8 @@ export const meta: MetaFunction = () => {
 };
 
 export default function Index() {
+  const context = useOutletContext()
+
   const { patients } = useLoaderData<typeof loader>()
   return <div className="w-full min-h-screen h-10  flex gap-4">
     <div className="w-5/12 flex flex-col gap-8 p-16">
@@ -51,7 +53,7 @@ export default function Index() {
     </div>
     </div>
     <div className="w-7/12 bg-white h-full">
-      <Outlet />
+      <Outlet context={context} />
     </div>
   </div>
 }
