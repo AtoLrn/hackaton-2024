@@ -6,8 +6,11 @@ import { Prisma } from '@prisma/client';
 import { Data } from '../entities/data.entity';
 
 export interface IDataRepository {
+    getDataById(id: number): Promise<Data>
     getDataByTheme(theme: string): Promise<Data[]>
+    getThemeByDataId(id: number): Promise<string>
     updateDataNoteById(data: Data, note: number): Promise<Data>
+    getDataByThemeByNote(theme: string, note: number): Promise<Data[]>
 }
 
 @injectable()
@@ -18,6 +21,25 @@ export class DataRepository implements IDataRepository {
     constructor(@inject(TYPES.PrismaConnector) prisma: IPrismaConnector) {
         this.data = prisma.getPrisma().data
         this.theme = prisma.getPrisma().theme
+    }
+
+    async getDataById(id: number): Promise<Data> {
+        const data = await this.data.findUnique({
+            where: {
+                id
+            }
+        });
+
+        return Data.ToData(data)
+    }
+
+    async getThemeByDataId(id: number): Promise<string> {
+      const theme = await this.theme.findUnique({
+        where: {
+          id
+        }
+      });
+      return theme.name
     }
     
     async getDataByTheme(theme: string): Promise<Data[]> {
@@ -39,6 +61,16 @@ export class DataRepository implements IDataRepository {
       return dataList.map(data => Data.ToData(data))
     }
 
+    async getDataByThemeByNote(theme: string, note: number): Promise<Data[]> {
+      const dataList = await this.data.findMany({
+        where: {
+          note
+        }
+      });
+
+      return dataList.map(data => Data.ToData(data))
+    }
+
     async updateDataNoteById(data: Data, note: number): Promise<Data> {
       const updatedData = await this.data.update({
         where: {
@@ -49,6 +81,6 @@ export class DataRepository implements IDataRepository {
         }
       });
 
-      return updatedData
+      return Data.ToData(updatedData)
     }
 }

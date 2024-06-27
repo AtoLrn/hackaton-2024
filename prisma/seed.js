@@ -28,7 +28,9 @@ async function main() {
         question: row.question,
         reponse: row[' reponse'],
         exploitable: false,
-        note: 0,
+        note: Math.floor(Math.random() * (10 - 5) + 5),
+        themeReponseId: Math.floor(Math.random() * 4) + 1,
+        themeQuestionId: Math.floor(Math.random() * 4) + 1,
         isReponseConsistent: false
       });
     })

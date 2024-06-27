@@ -1,5 +1,6 @@
 // import { BarChart } from "@mui/x-charts";
 import { Chart } from 'chart.js/auto';
+import { getRelativePosition } from 'chart.js/helpers';
 import { LoaderFunctionArgs, json, type MetaFunction } from "@remix-run/node";
 import { Kpi } from "~/components/kpi";
 import { useEffect, useRef, useState } from 'react';
@@ -81,11 +82,20 @@ export default function Index() {
           label: "Nombre d'avis",
           data: data,
         }],
-        labels: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']
+        labels: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'],
       },
       options: {
         maintainAspectRatio: false,
-        responsive: true
+        responsive: true,
+        onClick: (e) => {
+          const canvasPosition = getRelativePosition(e, chart);
+
+          const dataX = chart.scales.x.getValueForPixel(canvasPosition.x)+1;
+
+          if (typeof dataX === 'number') {
+            document.location.href = `/feedbacks/${theme}/${dataX}`
+          }
+        }
     }
     })
 

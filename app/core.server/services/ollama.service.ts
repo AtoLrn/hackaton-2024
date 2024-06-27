@@ -31,7 +31,7 @@ export class OllamaService implements Iollama {
         throw new Error('Method not implemented.');
     }
 
-    async refetchHealthIndicatorFromFeedback(data: Data, indicator: number): Promise<unknown>
+    async refetchHealthIndicatorFromFeedback(data: Data, indicator: number): Promise<Data|null>
     {
         const system = {
             role: 'system',
@@ -63,12 +63,12 @@ export class OllamaService implements Iollama {
 
         if (typeof parsedRes.health_indicator !== "undefined" && typeof parsedRes.health_indicator !== "number") {
             const updatedData = await this.dataRepository.updateDataNoteById(data, parsedRes.health_indicator);
+            return updatedData
         }
-
-        return parsedRes
+        return null
     }
 
-    async refetchSatisfactionIndicatorFromFeedback(data: Data, indicator: number): Promise<unknown> 
+    async refetchSatisfactionIndicatorFromFeedback(data: Data, indicator: number): Promise<Data|null> 
     {
         const system = {
             role: 'system',
@@ -98,11 +98,13 @@ export class OllamaService implements Iollama {
 
         const parsedRes = JSON.parse(output.message.content)
 
-        if (typeof parsedRes.satisfaction_indicator !== "undefined" && typeof parsedRes.satisfaction_indicator !== "number") {
-            const updatedData = await this.dataRepository.updateDataNoteById(data, parsedRes.satisfaction_indicator);
+        if (typeof parsedRes.satisfaction_indicator !== "undefined" && typeof parsedRes.satisfaction_indicator === "number") {
+            const updatedData = await this.dataRepository.updateDataNoteById(data, parsedRes.satisfaction_indicator)
+            return updatedData
+        } else {
+            return null
         }
 
-        return parsedRes
     }
 
     async isQuestionAnswerCohesive(question: string, answer: string, theme: object): Promise<unknown> {
