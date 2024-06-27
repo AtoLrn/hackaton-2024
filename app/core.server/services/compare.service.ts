@@ -50,6 +50,9 @@ export class OllamaCompare implements ICompareSingleService {
                 role: 'system',
                 content: `Extract the personals informations in the provided texts with the following rules:
 - Match only informations that correspond to PII (Personally identifiable information) such as name
+- Match the city name
+- Match the doctor's name
+- Match the phone number
 - Ignore the medicals informations
 - Ignore the pronouns
 - Do not match the words that follow this pattern [UPPERCASE]

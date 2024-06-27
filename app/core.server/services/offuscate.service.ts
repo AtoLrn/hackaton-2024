@@ -83,7 +83,12 @@ export class OffuscateService implements IOffuscateService {
                     return await accR
                 }
 
-                return (await accR).replaceAll(valR.matched, `[AI]`)        
+                const words = valR.matched.split(' ')
+
+                return words.reduce((accX, word) => {
+                    const reg = new RegExp(word, "gi")
+                    return accX.replaceAll(reg, '[AI]')
+                }, await accR)
             }, acc)
         }, Promise.resolve(firstRoundMessage))
 
