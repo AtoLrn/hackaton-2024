@@ -52,17 +52,17 @@ export default function Index() {
 
   useEffect(() => {
     let globalScore = 0;
-    let unconsistentAnswers = 0
+    let consistentAnswers = 0
 
     for (let i = 0; i < dataList.length; i++){
       globalScore += dataList[i].note
-      if (dataList[i].themeReponseId !== dataList[i].themeQuestionId) {
-        unconsistentAnswers += 1
+      if (dataList[i].themeReponseId === dataList[i].themeQuestionId && dataList[i].exploitable) {
+        consistentAnswers += 1
       }
     }
 
     setNoteAverage(Math.floor((globalScore / dataList.length) * 10))
-    setConsistency(Math.floor(100 * unconsistentAnswers / dataList.length))
+    setConsistency(Math.floor(100 * consistentAnswers / dataList.length))
   })
 
   useEffect(() => {
@@ -105,9 +105,11 @@ export default function Index() {
   }) 
   
   useEffect(() => {
-    const data = [0, 0]
+    const data = [0, 0, 0]
     for (let i = 0; i < dataList.length; i++){
-      if(dataList[i].themeQuestionId != dataList[i].themeReponseId) {
+      if(!dataList[i].exploitable) {
+        data[2]++
+      } else if(dataList[i].themeQuestionId != dataList[i].themeReponseId) {
         data[1]++
       } else {
         data[0]++
@@ -125,10 +127,11 @@ export default function Index() {
           data: data,
           backgroundColor: [
             'rgb(0, 128, 0)',
+            'rgb(0, 0, 255)',
             'rgb(255, 0, 0)',
           ]
         }],
-        labels: ['exploitables', 'inexploitables'],
+        labels: ['exploitables', 'sans lien', 'inexploitables'],
       },
       options: {
         maintainAspectRatio: false,
@@ -158,23 +161,24 @@ export default function Index() {
       </NavLink>
     </div>
     <div className="flex justify-center items-center gap-16">
-      <Kpi
+      {theme === "sante" || theme === "satisfaction" ?<Kpi
         name="Indice de satisfaction"
         rate={noteAverage}
         progress={0.0102}
-      />
+      /> : null}
       <Kpi
-        name="Pourcentage inexploitable"
+        name="Pourcentage de réponses exploitables"
         rate={consistency}
       />
     </div>
     
+    {theme === "sante" || theme === "satisfaction" ?
     <div className="rounded-lg flex flex-col w-full bg-white shadow-xl p-12">
       <h3 className="font-bold text-2xl">Indice de satisfaction</h3>
       <canvas className='h-96 max-h-96' ref={canvas} id='chart-completions-rate'></canvas>
-    </div>
+    </div>: null}
     <div className="rounded-lg flex flex-col w-full bg-white shadow-xl p-12">
-    <h3 className="font-bold text-2xl">Réponses exploitables/inexploitables</h3>
+    <h3 className="font-bold text-2xl">Lien entre la question et la réponse</h3>
       <canvas className='h-96 max-h-96' ref={unsureCanvas} id='chart-completions-rate'></canvas>
     </div>
     </div>
