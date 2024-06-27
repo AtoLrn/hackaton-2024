@@ -12,7 +12,7 @@ async function fetchQuestions() {
     const questions = await prisma.data.findMany({
         take: 2,
         where: {
-            id: { equals: 233 },
+            id: { equals: 293 },
             themeQuestionId: null,
             themeReponseId: null,
             reponse: { not: null },
@@ -126,12 +126,11 @@ async function doesTheAnswerIsUsable(answer) {
 
   const questions = await fetchQuestions()
   const themes = await fetchThemes()
-  console.log("themes in database : ", themes)
 
     for (const question of questions) {
-      console.log("--------------------");
-      console.log("Question : ", question.question)
-      console.log("Reponse : ", question.reponse)
+    //   console.log("--------------------");
+    //   console.log("Question : ", question.question)
+    //   console.log("Reponse : ", question.reponse)
 
     //On regarde si les questions et les réponses sont cohérente entre elles, (et quelles ont le meme theme)
       const isQuestionResponseCohesiveOllama = await isQuestionAnswerCohesive(question.question, question.reponse, themes)
@@ -176,7 +175,7 @@ async function doesTheAnswerIsUsable(answer) {
 
       }
 
-      console.log("question : ", question)
+    //   console.log("question : ", question)
       //l'objet à traiter est question, on peut le sauvegarder en DB tho
 
     }
