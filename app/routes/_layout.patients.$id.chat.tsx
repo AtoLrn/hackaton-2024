@@ -42,11 +42,9 @@ export default function Index() {
 
   useEffect(() => {
     if (fetcher.data) {
-      subscriptions.addSubscription(fetcher.data.id, () => setLoading(false))
-      
       setLoading(true)
+      subscriptions.addSubscription(fetcher.data.id, () => setLoading(false))
     }
-    
   }, [fetcher.data])
 
 

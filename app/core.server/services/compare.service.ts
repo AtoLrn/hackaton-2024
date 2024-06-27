@@ -49,10 +49,9 @@ export class OllamaCompare implements ICompareSingleService {
         const system = {
                 role: 'system',
                 content: `Extract the personals informations in the provided texts with the following rules:
-- Match only informations that correspond to PII (Personally identifiable information)
+- Match only informations that correspond to PII (Personally identifiable information) such as name
 - Ignore the medicals informations
 - Ignore the pronouns
-- Ignore the subjects
 - Do not match the words that follow this pattern [UPPERCASE]
 - Answer in this pattern where matched is the string to replace and rate the trust rate: {"results": [{"matched": "string", "rate": float}]`
         }
@@ -76,8 +75,6 @@ export class OllamaCompare implements ICompareSingleService {
             const results = JSON.parse(output.message.content) as unknown
             
             const parsed = OllamaCompare.model.parse(results)
-
-            console.log(message, parsed)
 
             return parsed.results
         } catch {

@@ -30,7 +30,7 @@ export class PatientRepository implements IPatientRepository {
               false
             ),
             new Message(
-              "Oui, Ma fille s'appelle Jeanne, j'ai aussi des courbatures et je me sens très fatigué. Ma température est de 38,5°C. Mon adresse est 99 Rue de conflans",
+              "Oui, Ma fille s'appelle Jeanne j'ai aussi des courbatures et je me sens très fatigué. Ma température est de 38,5°C. Mon adresse est 99 Rue de conflans",
               true
             ),
             new Message(
