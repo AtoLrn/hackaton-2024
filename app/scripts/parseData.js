@@ -4,7 +4,6 @@ import { Ollama } from 'ollama';
 const prisma = new PrismaClient();
 const ollama = new Ollama({ host: 'http://127.0.0.1:11434' })
 
-
 /**
  * DB RELATED
  */
@@ -26,6 +25,62 @@ async function fetchThemes() {
 /**
  * IA RELATED
  */
+
+async function fetchHealthIndicatorFromFeedback(question, response)
+{
+    const system = {
+        role: 'system',
+        content: 'Tu es un expert de santé qui a plus de vingt ans d\'expérience et qui sait prendre en compte les retours de ses patients afin d\'en tirer des conclusions sur leur état de santé. Je vais te soumettre une question posé par un service automatique ou par un personnel de santé, et une réponse donné par un patient pouvant ne pas être à l\'aise avec la technologie. Si la question est à propos de la douleur, prends le en compte, si le patient n\'a pas ou peu de douleurs, c\'est que le health_indicator doit être très élevé. Donne moi un indicateur de 1 à 10 sur l\'état de santé du patient (1 : état de santé critique, 10: état de santé parfait),  ainsi qu\'une note de 1 à 10 qui note la compatibilité de la réponse (1: la réponse ne correspond pas du tout à la question, 10: la réponse correspond parfaitement à la question).'
+    }
+    const systemAbreviations = {
+        role: 'system',
+        content: 'Voici une lise des abréviations utilisées, prends les en compte dans ta notation : "TVB" pour "TOUT VA BIEN", "AID" pour "AIDE"'
+    }
+    const systemFormat = {
+        role: 'system',
+        content: 'Ton format de retour est : {"health_indicator": int, "compatibility": int}'
+    }
+    const prompt = {
+        role: 'user',
+        content : 'Voici la question posée : "'+question+'"(si la question contient une échelle différente, ignore l\'échelle donnée dans la question ne renvoie qu\'une note de 1 à 10), et voici la réponse donnée par le patient : "'+response+'".'
+    }
+    const output = await ollama.chat({
+        model: 'mistral',
+        messages: [system, systemAbreviations, systemFormat, prompt],
+        format: 'json'
+    })
+
+    const parsedRes = JSON.parse(output.message.content)
+    return parsedRes
+}
+
+async function fetchSatisfactionIndicatorFromFeedback(question, response) 
+{
+    const system = {
+        role: 'system',
+        content: 'Tu es un personnel d\'hôpital qui s\'occupe des patients. Tu sais prendre en compte les avis des patients sur leur séjour à l\'hôpital, la pénibilité et la facilité des différentes tâches et en tirer un indicateur de satisfaction. Je vais te poser des questions et en fonction de la réponse, donne-moi un indicateur de 1 à 10 sur l\'état de satisfaction du patient ainsi qu\'une note de 1 à 10 qui note la compatibilité de la réponse à la question.'
+    }
+    const systemAbreviations = {
+        role: 'system',
+        content: 'Voici une lise des abréviations utilisées : "TVB" pour "TOUT VA BIEN", "AID" pour "AIDE"'
+    }
+    const systemFormat = {
+        role: 'system',
+        content: 'Ton format de retour est : {"satisfaction_indicator": int, "compatibility": int}'
+    }
+    const prompt = {
+        role: 'user',
+        content : 'Voici la question posée :  "'+question+'" (si la question contient une échelle différente, ignore l\'échelle donnée dans la question ne renvoie qu\'une note de 1 à 10), et voici la réponse donnée par le patient : "'+response+'".'
+    }
+    const output = await ollama.chat({
+        model: 'mistral',
+        messages: [system, systemAbreviations, systemFormat, prompt],
+        format: 'json'
+    })
+
+    const parsedRes = JSON.parse(output.message.content)
+    return parsedRes
+}
 
 const exempleThemePrompt = {
     role: 'system',
@@ -167,6 +222,45 @@ async function classifyData(data, themes) {
       return data
 }
 
+async function fetchDataFeedback(data, themes) {
+  let indicator = false
+  const themeReponse = themes.find(t => t.id === data.themeReponseId);
+  const themeQuestion = themes.find(t => t.id === data.themeQuestionId);
+  console.log("Theme response :" + themeReponse.name)
+    
+    switch (themeReponse.name) {
+      case "HEALTH": //health
+        console.log("theme reponse is HEALTH")
+        if (themeReponse !== themeQuestion) {
+          indicator = await fetchHealthIndicatorFromFeedback("Boujour, comment evalueriez votre état de santé?", data.reponse)
+        } else {
+          indicator = await fetchHealthIndicatorFromFeedback(data.question, data.reponse)
+        }
+        if (typeof indicator.health_indicator === 'number') {
+          data.note = indicator
+        }
+        break
+      
+      case "SATISFACTION": //satisfaction
+        console.log("theme reponse is SATISFACTION")
+        if (themeReponse !== themeQuestion) {
+          indicator = await fetchHealthIndicatorFromFeedback("Boujour, comment evalueriez votre satisfaction dans notre établissement?", data.reponse)
+        } else {
+          indicator = await fetchSatisfactionIndicatorFromFeedback(data.question, data.reponse)
+        }
+        if (typeof indicator.satisfaction_indicator === 'number') {
+          data.note = indicator
+        }
+        break
+
+      default:
+        console.log("theme reponse is OTHER or INFORMATION")
+        data.note = 0
+    }
+
+    return data
+}
+
 const dataList = await fetchDatalist()
 const themes = await fetchThemes()
 
@@ -184,11 +278,25 @@ for (let i = 0; i < dataList.length; i++) {
                 exploitable: classifiedData.exploitable
             }
         })
-        console.log(dataList[i])
     } catch (error) {
         console.log("Error while classifying data with id : "+dataList[i].id+"...\n")
         console.log(error)
     }
     console.log("Data :"+dataList[i].id+" classified.\n")
+    console.log("Fetching indicator for data : " + dataList[i].id)
 
+    try {
+      const updatedData = await fetchDataFeedback(dataList[i], themes)
+      await prisma.data.update({
+          where: { id: updatedData.id },
+          data: {
+            note: updatedData.note,
+          }
+      })
+    } catch (error) {
+        console.log("Error while fetching feedback for data with id : "+dataList[i].id+"...\n")
+        console.log(error)
+    }
+    console.log("Data :"+dataList[i].id+" have now a note.\n")
+    console.log(dataList[i])
 }

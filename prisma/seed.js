@@ -5,7 +5,7 @@ import csvParser from 'csv-parser'
 const prisma = new PrismaClient();
 
 async function main() {
-  const themes = ['HEALTH', 'INFORMATION', 'SATISFACTION', 'OTHER'];
+  const themes = ['HEALTH', 'SATISFACTION', 'INFORMATION', 'OTHER'];
 
   for (const themeName of themes) {
     await prisma.theme.upsert({
