@@ -8,6 +8,12 @@ export interface Iollama {
     loadData(data: unknown): Promise<unknown>
     refetchHealthIndicatorFromFeedback(data: Data, indicator: number): Promise<unknown>
     refetchSatisfactionIndicatorFromFeedback(data: Data, indicator: number): Promise<unknown>
+    refetchHealthIndicatorFromFeedback(question: string, response: string, indicator: number, additional_info: string): Promise<unknown>
+    refetchSatisfactionIndicatorFromFeedback(question: string, response: string, indicator: number, additional_info: string): Promise<unknown>
+    fetchFeedbacks(): Promise<unknown>
+    isQuestionAnswerCohesive(question: string, answer: string | null, theme: object): Promise<unknown>
+    getThemeQuestion(question: string, theme: Array<string>): Promise<unknown>
+    getThemeAnswer(answer: string, theme: Array<string>): Promise<unknown>
 }
 
 @injectable()
@@ -97,5 +103,97 @@ export class OllamaService implements Iollama {
         }
 
         return parsedRes
+    }
+
+    async isQuestionAnswerCohesive(question: string, answer: string, theme: object): Promise<unknown> {
+        if (!this.isLoaded) {
+            throw new ErrorLoadingTooEarly()
+        }
+        let themesArray = []
+        for (let i = 0; i < theme.length; i++) {
+            themesArray.push(theme[i].name)
+        }
+        const system = {
+            role: 'system',
+            content: 'Tu es un expert de santé qui a plus de vingt ans d\'expérience et qui sait prendre en compte les retours de ses patients afin d\'en tirer des conclusions sur leur état de santé. Je vais te poser une question et une réponse donnée par un patient, et tu dois me dire si la réponse est cohérente avec la question et quelles sont liés à un des themes que je fourni, répond par oui si la réponse et la question possèdent le même theme (parmis les themes que je te fourni), sinon non. Réponds par "oui" ou "non" obligatoirement.Répond uniquement par OUI ou NON, pas de phrase, pas besoin de mexpliquer, je veux une réponse dans le format : { "cohesive": "oui" } ou { "cohesive": "non" }.'
+        }
+        const prompt = {
+            role: 'user',
+            content : 'Voici la question posée : "'+question+'", et voici la réponse donnée par le patient : "'+answer+'". Les themes sont : '+themesArray+'.'
+        }
+        const output = await this.ollama.chat({
+            model: 'mistral',
+            messages: [system, prompt],
+            format: 'json'
+        })
+        return output
+    }
+
+    async getThemeQuestion(question: string, theme: object): Promise<unknown> {
+        if (!this.isLoaded) {
+            throw new ErrorLoadingTooEarly()
+        }
+        let themesArray = []
+        for (let i = 0; i < theme.length; i++) {
+            themesArray.push(theme[i].name)
+        }
+        const system = {
+            role: 'system',
+            content: 'Tu es un expert de santé qui a plus de vingt ans d\'expérience et qui sait prendre en compte les retours de ses patients afin d\'en tirer des conclusions sur leur état de santé. Je vais te poser une question et tu dois me dire à quel theme elle appartient parmis les thèmes suivants: '+themesArray+'. Réponds par le theme obligatoirement dans le format suivant { "theme": "<theme correspondant>" }.'
+        }
+        const prompt = {
+            role: 'user',
+            content : 'Voici la question posée : "'+question+'".'
+        }
+        const output = await this.ollama.chat({
+            model: 'mistral',
+            messages: [system, prompt],
+            format: 'json'
+        })
+        return output
+    }
+
+    async getThemeAnswer(answer: string, theme: object): Promise<unknown> {
+        if (!this.isLoaded) {
+            throw new ErrorLoadingTooEarly()
+        }
+        let themesArray = []
+        for (let i = 0; i < theme.length; i++) {
+            themesArray.push(theme[i].name)
+        }
+        const system = {
+            role: 'system',
+            content: 'Tu es un expert de santé qui a plus de vingt ans d\'expérience et qui sait prendre en compte les retours de ses patients afin d\'en tirer des conclusions sur leur état de santé. Je vais te donner une réponse à une question et tu dois me dire à quel theme elle appartient parmis les thèmes suvant : '+ themesArray+ ', répond par le theme de la réponse obligatoirement dans ce format : { "theme": "<theme correspondant>" }.'
+        }
+        const prompt = {
+            role: 'user',
+            content : 'Voici la réponse donnée par le patient : "'+answer+'"'
+        }
+        const output = await this.ollama.chat({
+            model: 'mistral',
+            messages: [system, prompt],
+            format: 'json'
+        })
+        return output
+    }
+
+    async doesTheAnswerIsUsable(answer: string): Promise<unknown> {
+        if (!this.isLoaded) {
+            throw new ErrorLoadingTooEarly()
+        }
+        const system = {
+            role: 'system',
+            content: 'Tu es un expert de santé qui a plus de vingt ans d\'expérience et qui sait prendre en compte les retours de ses patients afin d\'en tirer des conclusions sur leur état de santé. Je vais te poser une réponse et tu dois me dire si elle est compréhensible et ou utilisable pour obtenir le theme de cette réponse, cest à dire ou non, répond par "oui" si la réponse est utilisable, sinon "non, je veux une réponse dans le format : { "usable": "oui" } ou { "usable": "non" }.'
+        }
+        const prompt = {
+            role: 'user',
+            content : 'Voici la réponse donnée par le patient : "'+answer+'".'
+        }
+        const output = await this.ollama.chat({
+            model: 'mistral',
+            messages: [system, prompt],
+            format: 'json'
+        })
+        return output
     }
 }
