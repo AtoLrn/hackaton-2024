@@ -39,7 +39,7 @@ export class OffuscateService implements IOffuscateService {
             }
 
             return results.reduce((accR, valR) => {
-                if (valR.rate < 0.5) {
+                if (valR.rate <= 0.5) {
                     return accR
                 }
 
@@ -79,7 +79,7 @@ export class OffuscateService implements IOffuscateService {
 
                 }
 
-                if (valR.rate < 0.5) {
+                if (valR.rate <= 0.5) {
                     return await accR
                 }
 
