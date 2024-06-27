@@ -237,7 +237,7 @@ async function fetchDataFeedback(data, themes) {
           indicator = await fetchHealthIndicatorFromFeedback(data.question, data.reponse)
         }
         if (typeof indicator.health_indicator === 'number') {
-          data.note = indicator
+          data.note = indicator.health_indicator
         }
         break
       
@@ -249,7 +249,7 @@ async function fetchDataFeedback(data, themes) {
           indicator = await fetchSatisfactionIndicatorFromFeedback(data.question, data.reponse)
         }
         if (typeof indicator.satisfaction_indicator === 'number') {
-          data.note = indicator
+          data.note = indicator.satisfaction_indicator
         }
         break
 
@@ -298,5 +298,5 @@ for (let i = 0; i < dataList.length; i++) {
         console.log(error)
     }
     console.log("Data :"+dataList[i].id+" have now a note.\n")
-    console.log(dataList[i])
+    console.log(dataList[i]) 
 }
