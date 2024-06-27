@@ -8,17 +8,14 @@ const ollama = new Ollama({ host: 'http://127.0.0.1:11434' })
 /**
  * DB RELATED
  */
-async function fetchQuestions() {
-    const questions = await prisma.data.findMany({
-        take: 2,
+async function fetchDatalist() {
+    const dataList = await prisma.data.findMany({
         where: {
-            id: { equals: 293 },
             themeQuestionId: null,
             themeReponseId: null,
-            reponse: { not: null },
         }
     });
-    return questions;
+    return dataList;
 }
 
 async function fetchThemes() {
@@ -124,59 +121,74 @@ async function doesTheAnswerIsUsable(answer) {
  * END OF IA RELATED
  */
 
-  const questions = await fetchQuestions()
-  const themes = await fetchThemes()
-
-    for (const question of questions) {
-    //   console.log("--------------------");
-    //   console.log("Question : ", question.question)
-    //   console.log("Reponse : ", question.reponse)
-
+async function classifyData(data, themes) {
     //On regarde si les questions et les réponses sont cohérente entre elles, (et quelles ont le meme theme)
-      const isQuestionResponseCohesiveOllama = await isQuestionAnswerCohesive(question.question, question.reponse, themes)
+      const isQuestionResponseCohesiveOllama = await isQuestionAnswerCohesive(data.question, data.reponse, themes)
       const jsonCohesiveParsed = JSON.parse(isQuestionResponseCohesiveOllama.message.content);
       const isQuestionResponseCohesive = jsonCohesiveParsed.cohesive == "oui" ? true : false
 
       //on récupère le theme de la question en même temps 
-      const themeOfQuestionOllama = await getThemeQuestion(question.question, themes)
+      const themeOfQuestionOllama = await getThemeQuestion(data.question, themes)
       const jsonThemeQuestionParsed = JSON.parse(themeOfQuestionOllama.message.content);
       const themeOfQuestion = jsonThemeQuestionParsed.theme
       const theme = themes.find(theme => theme.name === themeOfQuestion)  //Get theme id from theme name
     
        //Si cohérente, on récupère le theme de la question(fait précedemment) et on le set à la question et a la réponse
       if(isQuestionResponseCohesive){
-          question.themeQuestionId = theme.id ? theme.id : null
-          question.themeReponseId = theme.id ? theme.id : null
-          question.exploitable = true
+        data.themeQuestionId = theme.id ? theme.id : null
+        data.themeReponseId = theme.id ? theme.id : null
+        data.exploitable = true
       }else{
         //On set le theme de la question comme on l'a
-        question.themeQuestionId = theme.id ? theme.id : null
+        data.themeQuestionId = theme.id ? theme.id : null
 
         //on récupère le theme de la réponse si on peut mainteant
-        const themeOfResponseOllama = await getThemeAnswer(question.reponse, themes)
+        const themeOfResponseOllama = await getThemeAnswer(data.reponse, themes)
         const jsonThemeResponseParsed = JSON.parse(themeOfResponseOllama.message.content);
         const themeOfResponse = jsonThemeResponseParsed.theme
         const themeResponse = themes.find(theme => theme.name === themeOfResponse)  //Get theme id from theme name
 
         //Si la question n'a pas de theme, on va voir si elle est "utilisable/compréhensible"
         if(!themeResponse){
-          const isQuestionUnderstandableOllama = await doesTheAnswerIsUsable(question.question)
+          const isQuestionUnderstandableOllama = await doesTheAnswerIsUsable(data.question)
           const jsonUnderstandableParsed = JSON.parse(isQuestionUnderstandableOllama.message.content);
           const isQuestionUnderstandable = jsonUnderstandableParsed.usable == "oui" ? true : false
           if(isQuestionUnderstandable){
-            question.exploitable = true
+            data.exploitable = true
           }else{
-            question.exploitable = false
+            data.exploitable = false
           }
         }else{
-            question.themeReponseId = themeResponse.id ? themeResponse.id : null
-            question.exploitable = true
+            data.themeReponseId = themeResponse.id ? themeResponse.id : null
+            data.exploitable = true
         }
-
       }
 
-    //   console.log("question : ", question)
-      //l'objet à traiter est question, on peut le sauvegarder en DB tho
+      return data
+}
 
+const dataList = await fetchDatalist()
+const themes = await fetchThemes()
+
+console.log(dataList.length + " data to classify.")
+for (let i = 0; i < dataList.length; i++) {
+    console.log("--------------------------------")
+    try {
+        const classifiedData = await classifyData(dataList[i], themes)
+        //Update data in DB
+        await prisma.data.update({
+            where: { id: classifiedData.id },
+            data: {
+                themeQuestionId: classifiedData.themeQuestionId,
+                themeReponseId: classifiedData.themeReponseId,
+                exploitable: classifiedData.exploitable
+            }
+        })
+        console.log(dataList[i])
+    } catch (error) {
+        console.log("Error while classifying data with id : "+dataList[i].id+"...\n")
+        console.log(error)
     }
+    console.log("Data :"+dataList[i].id+" classified.\n")
 
+}
