@@ -12,7 +12,7 @@ export interface DataRowProps {
 export const DataRow: React.FC<DataRowProps> = ({ id, question, reponse, note, fetcher }) => {
     return (
         <div className="flex flex-col gap-2">
-            {note && fetcher.state !== "loading" && fetcher.state !== "submitting" ? (
+            {note && (fetcher.state !== "loading" && fetcher.state !== "submitting") ? (
                 <div className="rounded-lg flex flex-col w-full bg-white shadow-xl p-8 gap-4">
                     <h1>{fetcher.formData}</h1>
                     <span className="w-4/6 rounded-lg flex bg-green shadow-xl p-6">

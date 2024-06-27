@@ -45,7 +45,7 @@ async function fetchHealthIndicatorFromFeedback(question, response)
         content : 'Voici la question posée : "'+question+'"(si la question contient une échelle différente, ignore l\'échelle donnée dans la question ne renvoie qu\'une note de 1 à 10), et voici la réponse donnée par le patient : "'+response+'".'
     }
     const output = await ollama.chat({
-        model: 'mistral',
+        model: 'llama3',
         messages: [system, systemAbreviations, systemFormat, prompt],
         format: 'json'
     })
@@ -73,7 +73,7 @@ async function fetchSatisfactionIndicatorFromFeedback(question, response)
         content : 'Voici la question posée :  "'+question+'" (si la question contient une échelle différente, ignore l\'échelle donnée dans la question ne renvoie qu\'une note de 1 à 10), et voici la réponse donnée par le patient : "'+response+'".'
     }
     const output = await ollama.chat({
-        model: 'mistral',
+        model: 'llama3',
         messages: [system, systemAbreviations, systemFormat, prompt],
         format: 'json'
     })

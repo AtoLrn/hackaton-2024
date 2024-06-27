@@ -69,7 +69,7 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
       break
   }
 
-  return json({ 
+  return json({
     updatedData
   })
 }
