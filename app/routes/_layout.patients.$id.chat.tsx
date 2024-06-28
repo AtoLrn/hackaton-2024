@@ -21,7 +21,8 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
   const patient = await patientRepository.getById(parseInt(id))
 
   return json({
-    patient
+    patient,
+
   })
 }
 
@@ -40,6 +41,7 @@ export default function Index() {
   const { patient } = useLoaderData<typeof loader>()
   const [ loading, setLoading ] = useState(false)
 
+
   useEffect(() => {
     if (fetcher.data) {
       setLoading(true)
@@ -52,6 +54,9 @@ export default function Index() {
       <div className="flex-1 bg-[#f9faff] shadow-lg rounded-md p-8 flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <h1 className="tracking-wider text-xl font-bold">Chat</h1>
+          <fetcher.Form method="POST" action={`/patients/${patient.id}/thematize`}>
+            <button className="px-4 py-2 bg-blue-500 text-white rounded-md shadow-md" type="submit">Analyser</button>
+          </fetcher.Form>
           <fetcher.Form method="POST" action={`/patients/${patient.id}/anonymize`}>
             <button className="px-4 py-2 bg-[#fb4f14] text-white rounded-md shadow-md" disabled={fetcher.state === 'submitting' || loading}>{fetcher.state !== 'submitting' && !loading ? 'Export' : 'Exporting...'}</button>
           </fetcher.Form>
@@ -60,10 +65,13 @@ export default function Index() {
         <Suspense fallback={<div>Loading...</div>}>
           <Await resolve={patient}>
             {(patient) =>  <ul className="flex flex-col gap-2">
-              { patient.messages.map(({ content, fromUser }) => {
-                return <li className={"p-2  rounded-lg shadow-xl max-w-[80%] " + (fromUser ? "self-end" : "text-black bg-[#ff8b64]")}  key={content}>
-                      <p>{ content }</p>
-                    </li>
+              { patient.messages.map(({ content, fromUser, theme }) => {
+                return (
+                  <li className={`p-2 rounded-lg shadow-xl max-w-[80%] ${fromUser ? "self-end" : "text-black bg-[#ff8b64]"}`} key={content}>
+                    <p>{content}</p>
+                    <p className="bg-blue-500 text-white px-2 py-1 rounded-md w-50">{theme}</p>
+                  </li>
+                );
                     })
                   }
                 </ul>

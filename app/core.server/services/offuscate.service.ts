@@ -3,9 +3,12 @@ import { Patient } from "../entities/patient.entity"
 import { TYPES } from "../infrastructure"
 import { ICompareService, ICompareSingleService } from "./compare.service"
 import { MemoryLruService } from "./lru.service"
+import { Ollama } from 'ollama';
+
 
 export interface IOffuscateService {
     offuscate(patient: Patient, message: string): Promise<string>
+    getTheme(patient: Patient, message: string): Promise<string>
 }
 
 export type IOffuscateServiceComparaisonFunction = (stringA: string, stringB: string) => IOffuscateServiceComparaison | undefined  
@@ -94,5 +97,38 @@ export class OffuscateService implements IOffuscateService {
 
         this.lru.set(message, result)
         return result
-    }    
+    } 
+
+    //function to get the theme of the message (using ollamaservice.findTheme)
+    async getTheme(patient: Patient, message: string): Promise<{ content: string; theme: any; }[]> {
+        const ollama = new Ollama({ host: 'http://127.0.0.1:11434' })
+
+        const themes = "HEALTH, SATISFACTION, INFORMATION, OTHER"
+        const system = {
+            role: 'system',
+            content: 'Tu es un expert de santé qui a plus de vingt ans d\'expérience et qui sait prendre en compte les retours de ses patients afin d\'en tirer des conclusions sur leur état de santé. Je vais te poser une question ou une réponse et tu dois me dire à quel theme appartient la conversation parmis les thèmes suivants: '+themes+'. Réponds par le theme obligatoirement dans le format suivant { "theme": "<theme correspondant>" }.'
+        }
+
+        for(let i = 0; i < patient.messages.length; i++) {
+            const prompt = {
+                role: 'user',
+                content: "Voici le message :"+patient.messages[i].content
+            }
+    
+            const output = await ollama.chat({
+                model: 'llama3',
+                messages: [system, prompt],
+                format: 'json'
+            })
+
+            const parsedRes = JSON.parse(output.message.content)
+            const theme = parsedRes.theme
+            patient.messages[i].theme = theme
+
+        }
+        Promise.resolve(patient)
+    }
+
+
+
 }
