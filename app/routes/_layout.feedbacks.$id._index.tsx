@@ -150,14 +150,17 @@ export default function Index() {
 
     <h1 className="font-bold text-4xl">{theme}</h1>
     <div className="flex justify-center gap-4">
-      <NavLink to={'/feedbacks/sante'} className="rounded-lg shadow-xl bg-white p-4">
-        Santé
+    <NavLink to={'/feedbacks/sante'} className="rounded-lg shadow-xl bg-white p-4">
+        Sante
       </NavLink>
       <NavLink to={'/feedbacks/satisfaction'} className="rounded-lg shadow-xl bg-white p-4">
         Satisfaction
       </NavLink>
       <NavLink to={'/feedbacks/information'} className="rounded-lg shadow-xl bg-white p-4">
-        Informations
+        Information
+      </NavLink>
+      <NavLink to={'/feedbacks/simulations'} className="rounded-lg shadow-xl bg-white p-4">
+        Simulations
       </NavLink>
     </div>
     <div className="flex justify-center items-center gap-16">

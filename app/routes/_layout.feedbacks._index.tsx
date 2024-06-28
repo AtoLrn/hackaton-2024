@@ -22,6 +22,9 @@ export default function Index() {
       <NavLink to={'/feedbacks/information'} className="rounded-lg shadow-xl bg-white p-4">
         Information
       </NavLink>
+      <NavLink to={'/feedbacks/simulations'} className="rounded-lg shadow-xl bg-white p-4">
+        Simulations
+      </NavLink>
     </div>
     </div>
   </div>

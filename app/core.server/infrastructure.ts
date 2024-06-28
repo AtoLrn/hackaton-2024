@@ -10,5 +10,6 @@ export const TYPES = {
     OffuscateService: Symbol.for('OffuscateService'),
     QueueService: Symbol.for('QueueService'),
     CompareService: Symbol.for('CompareService'),
-    CompareSingleService: Symbol.for('CompareSingleService')
+    CompareSingleService: Symbol.for('CompareSingleService'),
+    EventRepository: Symbol.for('EventRepository')
 }

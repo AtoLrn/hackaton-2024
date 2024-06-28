@@ -1,5 +1,4 @@
 import { ActionFunctionArgs, LoaderFunctionArgs, json, type MetaFunction } from "@remix-run/node";
-import { useEffect, useRef, useState } from 'react';
 import { NavLink, useFetcher, useLoaderData } from '@remix-run/react';
 import { TYPES } from "~/core.server/infrastructure";
 import { container } from "~/core.server/inversify.config";

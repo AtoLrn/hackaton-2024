@@ -12,6 +12,7 @@ import { OffuscateService } from './services/offuscate.service'
 import { DataRepository } from './repositories/data.repository'
 import { IncludeCompare, LevenshteinCompare, OllamaCompare } from './services/compare.service'
 import { MemoryQueueService } from './services/queue.service'
+import { EventRepository } from './repositories/event.repository'
 
 const container = new Container()
 container.bind(TYPES.PrismaConnector).to(PrismaConnector).inSingletonScope()
@@ -27,5 +28,6 @@ container.bind(TYPES.CompareService).to(IncludeCompare).inSingletonScope()
 container.bind(TYPES.CompareSingleService).to(OllamaCompare).inSingletonScope()
 container.bind(TYPES.OffuscateService).to(OffuscateService).inSingletonScope()
 container.bind(TYPES.QueueService).to(MemoryQueueService).inSingletonScope()
+container.bind(TYPES.EventRepository).to(EventRepository).inSingletonScope()
 
 export { container }
