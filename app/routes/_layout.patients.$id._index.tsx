@@ -1,9 +1,10 @@
-import { LoaderFunctionArgs, json, type MetaFunction } from "@remix-run/node";
-import { Link, useLoaderData } from "@remix-run/react";
-import { IoIosCall, IoIosSend } from "react-icons/io";
+import { LoaderFunctionArgs, defer, json, type MetaFunction } from "@remix-run/node";
+import { Await, useLoaderData } from "@remix-run/react";
+import { Suspense } from "react";
 import { TYPES } from "~/core.server/infrastructure";
 import { container } from "~/core.server/inversify.config";
 import { IPatientRepository } from "~/core.server/repositories/patient.repository";
+import { ILruService } from "~/core.server/services/lru.service";
 import { Iollama } from "~/core.server/services/ollama.service";
 
 export const loader = async ({ params }: LoaderFunctionArgs) => {
@@ -20,12 +21,16 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 
   const patient = await patientRepository.getById(parseInt(id))
 
-  const iaContent= await ollamaService.fetchPatientPersona(patient.messages)
-  const patientPersona = JSON.parse(iaContent.message.content)
+  const persona = new Promise<any>((resolve) => {
 
-  return json({
-    patient,
-    patientPersona: patientPersona.description
+    ollamaService.fetchPatientPersona(patient.messages).then((iaContent) => {
+      resolve(JSON.parse(iaContent.message.content).description)
+    })
+  })
+
+
+  return defer({
+    patientPersona: persona
   })
 }
 
@@ -36,12 +41,16 @@ export const meta: MetaFunction = () => {
 };
 
 export default function Index() {
-  const { patient, patientPersona } = useLoaderData<typeof loader>()
+  const { patientPersona } = useLoaderData<typeof loader>()
 
   return <div className="flex-1 p-12 flex items-stretch justify-stretch gap-12">
       <div className="flex-1 bg-[#f9faff] shadow-lg rounded-md p-8 flex flex-col gap-4">
         <h1 className="tracking-wider text-xl font-bold">Analyse du patient</h1>
-        <p className="tracking-widest text-gray-800">{patientPersona}</p>
+        <Suspense fallback={<div>Loading...</div>}>
+          <Await resolve={patientPersona}>
+            {(resolvedValue) => <p className="tracking-widest text-gray-800">{resolvedValue}</p>}
+          </Await>
+        </Suspense>
       </div>
       <div className="flex-1 bg-[#f9faff] shadow-lg rounded-md p-8 flex items-center justify-center">
         <img src="/surgery.webp" alt="" />

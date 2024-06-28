@@ -4,6 +4,7 @@ import { TYPES } from "../infrastructure"
 import { IDataRepository } from "../repositories/data.repository"
 import { Ollama } from 'ollama'
 import { Message } from "postcss"
+import { MemoryLruService } from "./lru.service"
 
 export interface Iollama {
     loadData(data: unknown): Promise<unknown>
@@ -18,12 +19,14 @@ export interface Iollama {
 
 @injectable()
 export class OllamaService implements Iollama {
+    private lru: MemoryLruService<unknown>
     ollama: Ollama
     isLoaded = false
     
     constructor(
         @inject(TYPES.DataRepository) private dataRepository: IDataRepository
     ) {
+        this.lru = new MemoryLruService<unknown>()
         this.ollama = new Ollama({ host: 'http://localhost:11434' })
         this.isLoaded = true
     }
@@ -115,7 +118,7 @@ export class OllamaService implements Iollama {
         if (!this.isLoaded) {
             throw new ErrorLoadingTooEarly()
         }
-        let themesArray = []
+        const themesArray = []
         for (let i = 0; i < theme.length; i++) {
             themesArray.push(theme[i].name)
         }
@@ -139,7 +142,7 @@ export class OllamaService implements Iollama {
         if (!this.isLoaded) {
             throw new ErrorLoadingTooEarly()
         }
-        let themesArray = []
+        const themesArray = []
         for (let i = 0; i < theme.length; i++) {
             themesArray.push(theme[i].name)
         }
@@ -163,7 +166,7 @@ export class OllamaService implements Iollama {
         if (!this.isLoaded) {
             throw new ErrorLoadingTooEarly()
         }
-        let themesArray = []
+        const themesArray = []
         for (let i = 0; i < theme.length; i++) {
             themesArray.push(theme[i].name)
         }
@@ -204,9 +207,17 @@ export class OllamaService implements Iollama {
     }
 
   async fetchPatientPersona(messages: Message[]): Promise<unknown> {
+    const key = JSON.stringify(messages)
+
+    const cache = this.lru.get(key)
+
+    if (cache) {
+        return cache
+    }
+
     const system = {
         role: 'system',
-        content: 'Tu es un expert de santé qui a plus de vingt ans d\'expérience et qui sait prendre en compte les retours de ses patients afin d\'en tirer des conclusions sur leur profil de patient. Tu as l\'habitude de communiquer avec tes patients via des messages et tu as donc pris l\'habitude de les comprendre via les discussions complètes et d\'en tirer une analyse complète du patient, sur le type de personne qu\'il est, sa tranche d\'âge, ses problèmes de santé, la gravité de son cas et pleins d\'autres élément dans le genre. Je vais te transmettre une discussion téléphonique complète entre un personnel de santé et un patient dans laquelle le professionnel de santé et le patient se parlent. Le format sera le suivant: <professionnel-sante: contenu de la question>, <patient: contenu de la réponse> - <patient: contenu de la question suivante>, <professionnel-sante: contenu de la réponse suivante>..... Donne moi d\'après la discussion une analyse complète du patient en suivant les critères que je t\'ai donné. Ta réponse aura le format suivant : {"description": "description du patient"}.'
+        content: 'Tu es un expert de santé qui a plus de vingt ans d\'expérience et qui sait prendre en compte les retours de ses patients afin d\'en tirer des conclusions sur leur profil de patient. Tu as l\'habitude de communiquer avec tes patients via des messages et tu as donc pris l\'habitude de les comprendre via les discussions complètes et d\'en tirer une analyse complète du patient, sur le type de personne qu\'il est, sa tranche d\'âge, ses problèmes de santé, la gravité de son cas et pleins d\'autres élément dans le genre. Je vais te transmettre une discussion téléphonique complète entre un personnel de santé et un patient dans laquelle le professionnel de santé et le patient se parlent. Le format sera le suivant: <professionnel-sante: contenu de la question>, <patient: contenu de la réponse> - <patient: contenu de la question suivante>, <professionnel-sante: contenu de la réponse suivante>..... Donne moi d\'après la discussion une analyse complète du patient en suivant les critères que je t\'ai donné. Ta réponse aura le format suivant : {"description": string }.'
     }
 
     let promptContent = ""
@@ -230,6 +241,11 @@ export class OllamaService implements Iollama {
         messages: [system, prompt],
         format: 'json'
     })
+
+    console.log('ANTOINE YY: ', output)
+
+    this.lru.set(key, output)
+
     return output
   }
 }
