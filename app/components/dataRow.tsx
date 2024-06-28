@@ -1,20 +1,21 @@
-import { FetcherWithComponents, Form } from "@remix-run/react";
+import { FetcherWithComponents, useFetcher, Form } from "@remix-run/react";
 
 export interface DataRowProps {
     id: number,
     question: string,
     reponse: number,
     note: number,
-    fetcher: FetcherWithComponents<any>
 }
 
 // eslint-disable-next-line react/prop-types
-export const DataRow: React.FC<DataRowProps> = ({ id, question, reponse, note, fetcher }) => {
+export const DataRow: React.FC<DataRowProps> = ({ id, question, reponse, note }) => {
+    const fetcher = useFetcher()
+
     return (
         <div className="flex flex-col gap-2">
             {note && (fetcher.state !== "loading" && fetcher.state !== "submitting") ? (
                 <div className="rounded-lg flex flex-col w-full bg-white shadow-xl p-8 gap-4">
-                    <h1>{fetcher.formData}</h1>
+                    <h1>{id}</h1>
                     <span className="w-4/6 rounded-lg flex bg-green shadow-xl p-6">
                         {question}
                     </span>
@@ -35,7 +36,7 @@ export const DataRow: React.FC<DataRowProps> = ({ id, question, reponse, note, f
             ) : null}
             {fetcher.state ==="loading" || fetcher.state ==="submitting" ? (
                 <div className="rounded-lg flex flex-col w-full bg-white shadow-xl p-8 gap-4">
-                    Chargement...
+                    Chargement du nouvel indicateur...
                 </div>
             ) : null}
         </div>

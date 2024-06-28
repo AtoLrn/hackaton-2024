@@ -9,8 +9,6 @@ export interface Iollama {
     loadData(data: unknown): Promise<unknown>
     refetchHealthIndicatorFromFeedback(data: Data, indicator: number): Promise<unknown>
     refetchSatisfactionIndicatorFromFeedback(data: Data, indicator: number): Promise<unknown>
-    refetchHealthIndicatorFromFeedback(question: string, response: string, indicator: number, additional_info: string): Promise<unknown>
-    refetchSatisfactionIndicatorFromFeedback(question: string, response: string, indicator: number, additional_info: string): Promise<unknown>
     fetchFeedbacks(): Promise<unknown>
     isQuestionAnswerCohesive(question: string, answer: string | null, theme: object): Promise<unknown>
     getThemeQuestion(question: string, theme: Array<string>): Promise<unknown>
@@ -49,7 +47,7 @@ export class OllamaService implements Iollama {
         }
         const systemAdditionalInfo = {
             role: 'system',
-            content: 'Ce couple de question réponse a déà reçu un indicateur de santé. Le personnel de santé a éstimé que cet indicateur qui était de '+indicator+' était incorrect.'
+            content: 'Ce couple de question réponse a déà reçu un indicateur de santé. Le personnel de santé a éstimé que cet indicateur qui était de '+indicator+' était incorrect analyse à nouveau ce couple de question/réponse et redonne un indicateur de santé. Ne redonne pas le même indicateur.'
         }
         const prompt = {
             role: 'user',
@@ -63,7 +61,9 @@ export class OllamaService implements Iollama {
 
         const parsedRes = JSON.parse(output.message.content)
 
-        if (typeof parsedRes.health_indicator !== "undefined" && typeof parsedRes.health_indicator !== "number") {
+        console.log(parsedRes);
+
+        if (typeof parsedRes.health_indicator !== "undefined" && typeof parsedRes.health_indicator === "number") {
             const updatedData = await this.dataRepository.updateDataNoteById(data, parsedRes.health_indicator);
             return updatedData
         }
@@ -86,7 +86,7 @@ export class OllamaService implements Iollama {
         }
         const systemAdditionalInfo = {
             role: 'system',
-            content: 'Ce couple de question réponse a déà reçu un indicateur de satisfaction. Le personnel de santé a éstimé que cet indicateur qui était de '+indicator+' était incorrect.'
+            content: 'Ce couple de question réponse a déà reçu un indicateur de satisfaction. Le personnel de santé a éstimé que cet indicateur qui était de '+indicator+' était incorrect analyse à nouveau ce couple de question/réponse et redonne un indicateur de satisfaction. Ne redonne pas le même indicateur.'
         }
         const prompt = {
             role: 'user',
@@ -99,6 +99,8 @@ export class OllamaService implements Iollama {
         })
 
         const parsedRes = JSON.parse(output.message.content)
+
+        console.log(parsedRes)
 
         if (typeof parsedRes.satisfaction_indicator !== "undefined" && typeof parsedRes.satisfaction_indicator === "number") {
             const updatedData = await this.dataRepository.updateDataNoteById(data, parsedRes.satisfaction_indicator)

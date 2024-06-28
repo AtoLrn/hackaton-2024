@@ -30,7 +30,7 @@ async function fetchHealthIndicatorFromFeedback(question, response)
 {
     const system = {
         role: 'system',
-        content: 'Tu es un expert de santé qui a plus de vingt ans d\'expérience et qui sait prendre en compte les retours de ses patients afin d\'en tirer des conclusions sur leur état de santé. Je vais te soumettre une question posé par un service automatique ou par un personnel de santé, et une réponse donné par un patient pouvant ne pas être à l\'aise avec la technologie. Si la question est à propos de la douleur, prends le en compte, si le patient n\'a pas ou peu de douleurs, c\'est que le health_indicator doit être très élevé. Donne moi un indicateur de 1 à 10 sur l\'état de santé du patient (1 : état de santé critique, 10: état de santé parfait),  ainsi qu\'une note de 1 à 10 qui note la compatibilité de la réponse (1: la réponse ne correspond pas du tout à la question, 10: la réponse correspond parfaitement à la question).'
+        content: 'Tu es un expert de santé qui a plus de vingt ans d\'expérience et qui sait prendre en compte les retours de ses patients afin d\'en tirer des conclusions sur leur état de santé. Je vais te soumettre une question posé par un service automatique ou par un personnel de santé, et une réponse donné par un patient pouvant ne pas être à l\'aise avec la technologie. Si la question est à propos de la douleur, prends le en compte, si le patient n\'a pas ou peu de douleurs, c\'est que le health_indicator doit être très élevé. Donne moi un indicateur de 1 à 10 sur l\'état de santé actuel du patient (1 : état de santé critique, 10: état de santé parfait), s\'il allait mal avant mais qu\'il va mieux, prend en compte son état présent. L\'indicateur, ne peut pas avoir une valeur égale à 0 (zéro), il doit forcément être comprise entre 1 et 10.'
     }
     const systemAbreviations = {
         role: 'system',
@@ -38,7 +38,7 @@ async function fetchHealthIndicatorFromFeedback(question, response)
     }
     const systemFormat = {
         role: 'system',
-        content: 'Ton format de retour est : {"health_indicator": int, "compatibility": int}'
+        content: 'Ton format de retour est : {"health_indicator": int}'
     }
     const prompt = {
         role: 'user',
@@ -58,7 +58,7 @@ async function fetchSatisfactionIndicatorFromFeedback(question, response)
 {
     const system = {
         role: 'system',
-        content: 'Tu es un personnel d\'hôpital qui s\'occupe des patients. Tu sais prendre en compte les avis des patients sur leur séjour à l\'hôpital, la pénibilité et la facilité des différentes tâches et en tirer un indicateur de satisfaction. Je vais te poser des questions et en fonction de la réponse, donne-moi un indicateur de 1 à 10 sur l\'état de satisfaction du patient ainsi qu\'une note de 1 à 10 qui note la compatibilité de la réponse à la question.'
+        content: 'Tu es un personnel d\'hôpital qui s\'occupe des patients. Tu sais prendre en compte les avis des patients sur leur séjour à l\'hôpital, la pénibilité et la facilité des différentes tâches et en tirer un indicateur de satisfaction. Je vais te poser des questions et en fonction de la réponse, donne-moi un indicateur de 1 à 10 sur l\'état de satisfaction du patient (1 : pas satisfait du tout, 10: très satisfait). L\'indicateur ne peut pas avoir une valeur égale à 0 (zéro), il doit forcément être comprise entre 1 et 10.'
     }
     const systemAbreviations = {
         role: 'system',
@@ -66,7 +66,7 @@ async function fetchSatisfactionIndicatorFromFeedback(question, response)
     }
     const systemFormat = {
         role: 'system',
-        content: 'Ton format de retour est : {"satisfaction_indicator": int, "compatibility": int}'
+        content: 'Ton format de retour est : {"satisfaction_indicator": int}'
     }
     const prompt = {
         role: 'user',

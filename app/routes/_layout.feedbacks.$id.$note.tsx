@@ -1,4 +1,6 @@
 import { ActionFunctionArgs, LoaderFunctionArgs, json, type MetaFunction } from "@remix-run/node";
+import toast, { Toaster } from 'react-hot-toast';
+import { useEffect, useRef, useState } from 'react';
 import { NavLink, useFetcher, useLoaderData } from '@remix-run/react';
 import { TYPES } from "~/core.server/infrastructure";
 import { container } from "~/core.server/inversify.config";
@@ -15,8 +17,6 @@ export const meta: MetaFunction = () => {
 
 export const loader = async ({params}: LoaderFunctionArgs) => {
     const dataRepository = container.get<IDataRepository>(TYPES.DataRepository)
-
-    // const  [dataListReactive, setDataListReactive] = useState([])
 
     const id = params['id'] as string
     const note = params['note'] as string
@@ -68,17 +68,22 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
       break
   }
 
+  toast.success('Nouvel indicateur généré avec succès ! Valeur : ' + note)
+
   return json({
     updatedData
   })
 }
 
 export default function Index() {
-  const fetcher = useFetcher()
   const { dataList, theme } = useLoaderData<typeof loader>()
 
   return <div className="w-full h-screen overflow-scroll p-16">
     <div className='flex flex-col gap-8'>
+      <div className="block absolute top-0 right-0">
+        <h1>CACA</h1>
+        <Toaster />
+      </div>
       <div className="flex justify-center gap-4">
         <NavLink to={`/feedbacks/${theme}`} className="rounded-lg shadow-xl bg-white p-4">
           Retour aux statistiques
@@ -91,7 +96,6 @@ export default function Index() {
             question={data.question}
             reponse={data.reponse}
             note={data.note}
-            fetcher={fetcher}
           />
         })}
       </div>
