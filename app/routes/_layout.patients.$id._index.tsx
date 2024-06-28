@@ -46,7 +46,7 @@ export default function Index() {
   return <div className="flex-1 p-12 flex items-stretch justify-stretch gap-12">
       <div className="flex-1 bg-[#f9faff] shadow-lg rounded-md p-8 flex flex-col gap-4">
         <h1 className="tracking-wider text-xl font-bold">Analyse du patient</h1>
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense key={'persona'} fallback={<div>Loading...</div>}>
           <Await resolve={patientPersona}>
             {(resolvedValue) => <p className="tracking-widest text-gray-800">{resolvedValue}</p>}
           </Await>
