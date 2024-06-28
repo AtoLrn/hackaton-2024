@@ -4,9 +4,11 @@ import { IoIosCall, IoIosSend } from "react-icons/io";
 import { TYPES } from "~/core.server/infrastructure";
 import { container } from "~/core.server/inversify.config";
 import { IPatientRepository } from "~/core.server/repositories/patient.repository";
+import { Iollama } from "~/core.server/services/ollama.service";
 
 export const loader = async ({ params }: LoaderFunctionArgs) => {
   const id = params['id']
+  const ollamaService = container.get<Iollama>(TYPES.OllamaService)
 
   if (!id) {
     throw new Response(undefined, {
@@ -18,8 +20,12 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 
   const patient = await patientRepository.getById(parseInt(id))
 
+  const iaContent= await ollamaService.fetchPatientPersona(patient.messages)
+  const patientPersona = JSON.parse(iaContent.message.content)
+
   return json({
-    patient
+    patient,
+    patientPersona: patientPersona.description
   })
 }
 
@@ -30,12 +36,12 @@ export const meta: MetaFunction = () => {
 };
 
 export default function Index() {
-  const { patient } = useLoaderData<typeof loader>()
+  const { patient, patientPersona } = useLoaderData<typeof loader>()
 
   return <div className="flex-1 p-12 flex items-stretch justify-stretch gap-12">
       <div className="flex-1 bg-[#f9faff] shadow-lg rounded-md p-8 flex flex-col gap-4">
         <h1 className="tracking-wider text-xl font-bold">Analyse du patient</h1>
-        <p className="tracking-widest text-gray-800">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Tempora maxime amet eius nostrum aliquid</p>
+        <p className="tracking-widest text-gray-800">{patientPersona}</p>
       </div>
       <div className="flex-1 bg-[#f9faff] shadow-lg rounded-md p-8 flex items-center justify-center">
         <img src="/surgery.webp" alt="" />
