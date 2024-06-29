@@ -116,7 +116,7 @@ export class OffuscateService implements IOffuscateService {
             }
     
             const output = await ollama.chat({
-                model: 'llama3',
+                model: 'mistral',
                 messages: [system, prompt],
                 format: 'json'
             })

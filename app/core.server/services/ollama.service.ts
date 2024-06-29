@@ -208,6 +208,7 @@ export class OllamaService implements Iollama {
 
   async fetchPatientPersona(messages: Message[]): Promise<unknown> {
     const key = JSON.stringify(messages)
+    console.log("loading persona")
 
     const cache = this.lru.get(key)
 

@@ -1,40 +1,60 @@
-# Welcome to Remix!
+# Hackathon Groupe 5
 
-- 📖 [Remix docs](https://remix.run/docs)
+Avant de lancer le projet, soyez sûr d'avoir un modèle d'IA ollama (mistral qui tourne sur votre PC):
+```
+ollama serve
+ollama run mistral
+```
 
-## Development
+Pour lancer le projet, d'abord cloner le repo, ensuite installez les dépendances :
+```
+npm install
+```
 
-Run the dev server:
-
-```shellscript
+Vous pouvez maintenant lancer le projet :
+```
 npm run dev
 ```
 
-## Deployment
+Le projet sera accessible à l'URL : `http://localhost:3000`
 
-First, build your app for production:
+## Liste des développeurs :
 
-```sh
-npm run build
-```
+- Antoine Lorin ([AtoLrn](https://github.com/AtoLrn))
+- Yohan Centanni ([ycenta](https://github.com/ycenta))
+- Samuel Guenier ([sguenier](https://github.com/sguenier))
+- Lucas Campistron ([Redeltaz](https://github.com/Redeltaz))
 
-Then run the app in production mode:
+## Liste des features et leurs auteurs
 
-```sh
-npm start
-```
+- UI du projet
+    - Antoine Lorin
+    - Yohan Centanni
+    - Samuel Guenier
+    - Lucas Campistron
 
-Now you'll need to pick a host to deploy it to.
+- Fiche résumé patient
+    - Antoine Lorin
+    - Yohan Centanni
+    - Lucas Campistron
 
-### DIY
+- Thématisation des messages
+    - Yohan Centanni
 
-If you're familiar with deploying Node applications, the built-in Remix app server is production-ready.
+- Anonymisation des messages
+    - Antoine Lorin
 
-Make sure to deploy the output of `npm run build`
+- Script analyse complète des messages :
+    - Samuel Guenier
+    - Yohan Centanni
+    - Lucas Campistron
 
-- `build/server`
-- `build/client`
+- Dashboard compte rendu analyse des messages :
+    - Antoine Lorin
+    - Lucas Campistron
 
-## Styling
+- Visualisation des messages analysés + reanalyse par IA :
+    - Samuel Guenier
 
-This template comes with [Tailwind CSS](https://tailwindcss.com/) already configured for a simple default starting experience. You can use whatever css framework you prefer. See the [Vite docs on css](https://vitejs.dev/guide/features.html#css) for more information.
+- Simulation sur les thématiques futures :
+    - Antoine Lorin

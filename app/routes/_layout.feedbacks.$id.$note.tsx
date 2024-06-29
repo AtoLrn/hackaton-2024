@@ -81,7 +81,6 @@ export default function Index() {
   return <div className="w-full h-screen overflow-scroll p-16">
     <div className='flex flex-col gap-8'>
       <div className="block absolute top-0 right-0">
-        <h1>CACA</h1>
         <Toaster />
       </div>
       <div className="flex justify-center gap-4">
